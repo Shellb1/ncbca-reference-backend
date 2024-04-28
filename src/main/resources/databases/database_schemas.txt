@@ -1,0 +1,12 @@
+Use these SQL commands to create databases locally or get copy from Shellb
+
+Teams:
+
+sqlite3 teams.db;
+CREATE TABLE teams(
+    team_id INT PRIMARY KEY,
+    team_name VARCHAR(100),
+    conference_id INT,
+    conference_name VARCHAR(100),
+    coach VARCHAR(100)
+);
