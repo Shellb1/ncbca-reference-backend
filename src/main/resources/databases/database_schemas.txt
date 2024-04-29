@@ -10,3 +10,14 @@ CREATE TABLE teams(
     conference_name VARCHAR(100),
     coach VARCHAR(100)
 );
+
+sqlite3 seasons.db;
+
+CREATE TABLE Seasons (
+    team_id INT,
+    team_name VARCHAR(250),
+    games_won INT,
+    games_lost INT,
+    season INT,
+    PRIMARY KEY (team_id, season)
+);

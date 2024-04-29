@@ -21,7 +21,8 @@ public class AdminController {
 
     @PostMapping("/load")
     public void loadExport(@RequestParam("file") MultipartFile file,
-                           @RequestParam("loadTeams") Boolean loadTeams) throws IOException {
-        loadExportHandler.loadExport(file, loadTeams);
+                           @RequestParam("loadTeams") Boolean loadTeams,
+                           @RequestParam("loadSeasons") Boolean loadSeasons) throws IOException {
+        loadExportHandler.loadExport(file, loadTeams, loadSeasons);
     }
 }

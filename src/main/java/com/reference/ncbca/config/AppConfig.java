@@ -1,9 +1,17 @@
 package com.reference.ncbca.config;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -21,5 +29,11 @@ public class AppConfig {
         conferencesMap.put(6, "American Athletic Conference");
         conferencesMap.put(7, "Mountain West Conference");
         return conferencesMap;
+    }
+
+    @Bean("coachesMap")
+    public Map<String, String> coachesMap() {
+        Map<String, String> coachesMap = new HashMap<>();
+        return coachesMap;
     }
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.reference.ncbca.model.Season;
 import com.reference.ncbca.model.Team;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -25,15 +26,19 @@ import java.util.Map;
 public class LoadExportHandler {
 
     private final Map<Integer, String> conferencesMap;
+    private final Map<String, String> coachesMap;
     private final TeamsHandler teamsHandler;
+    private final SeasonsHandler seasonsHandler;
 
-    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler) {
+    public LoadExportHandler(Map<Integer, String> conferencesMap, Map<String, String> coachesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler) {
         this.conferencesMap = conferencesMap;
+        this.coachesMap = coachesMap;
         this.teamsHandler = teamsHandler;
+        this.seasonsHandler = seasonsHandler;
     }
 
 
-    public void loadExport(MultipartFile file, Boolean loadTeams) throws IOException {
+    public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons) throws IOException {
         byte[] fileBytes = file.getBytes();
 
         // Remove BOM if present
@@ -55,11 +60,27 @@ public class LoadExportHandler {
                 Integer teamId = jsonTeam.get("tid").intValue();
                 Integer conferenceId = jsonTeam.get("cid").intValue();
                 String conferenceName = conferencesMap.get(conferenceId);
-                Team team = new Team(teamId, teamName, conferenceId, conferenceName, "coach");
+                Team team = new Team(teamId, teamName, conferenceId, conferenceName, coachesMap.get(teamName));
                 teams.add(team);
             }
             teamsHandler.loadTeams(teams);
         }
+
+        if (loadSeasons) {
+            List<Season> seasons = new ArrayList<>();
+            JsonNode teamsArray = export.get("teams");
+            for (JsonNode jsonTeam: teamsArray) {
+                String teamName = jsonTeam.get("region").textValue() + " " + jsonTeam.get("name").textValue();
+                Integer teamId = jsonTeam.get("tid").intValue();
+                int seasonsArraySize = jsonTeam.get("seasons").size();
+                Integer seasonYear = jsonTeam.get("seasons").get(seasonsArraySize - 1).get("season").intValue();
+                Integer gamesWon = jsonTeam.get("seasons").get(seasonsArraySize - 1).get("won").intValue();
+                Integer gamesLost = jsonTeam.get("seasons").get(seasonsArraySize - 1).get("lost").intValue();
+                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, seasonYear));
+            }
+            seasonsHandler.load(seasons);
+        }
+
         parser.close();
     }
 

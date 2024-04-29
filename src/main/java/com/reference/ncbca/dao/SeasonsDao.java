@@ -1,6 +1,6 @@
 package com.reference.ncbca.dao;
 
-import com.reference.ncbca.model.Team;
+import com.reference.ncbca.model.Season;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -10,25 +10,25 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Repository
-public class TeamsDao {
+public class SeasonsDao {
 
-    private static final String CONNECTION_STRING = "jdbc:sqlite:src/main/resources/databases/teams.db";
-    private static final String INSERT_SQL = "INSERT INTO teams(team_id,team_name,conference_id,conference_name,coach) VALUES(?,?,?,?,?)";
+    private static final String CONNECTION_STRING = "jdbc:sqlite:src/main/resources/databases/seasons.db";
+    private static final String INSERT_STRING = "INSERT INTO Seasons (team_id, team_name, games_won, games_lost, season) VALUES (?, ?, ?, ?, ?)";
 
-    public void insert(List<Team> teams) {
+    public void load(List<Season> seasons) {
 
         try (Connection conn = this.connect()) {
-            for (Team team: teams) {
-                PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
-                pstmt.setInt(1, team.teamId());
-                pstmt.setString(2, team.name());
-                pstmt.setInt(3, team.conferenceId());
-                pstmt.setString(4, team.conferenceName());
-                pstmt.setString(5, team.coach());
+            for (Season season: seasons) {
+                PreparedStatement pstmt = conn.prepareStatement(INSERT_STRING);
+                pstmt.setInt(1, season.teamId());
+                pstmt.setString(2, season.teamName());
+                pstmt.setInt(3, season.gamesWon());
+                pstmt.setInt(4, season.gamesLost());
+                pstmt.setInt(5, season.seasonYear());
                 pstmt.executeUpdate();
                 pstmt.close();
             }
-            } catch (SQLException e) {
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
