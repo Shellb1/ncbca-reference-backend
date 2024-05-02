@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public class SeasonsHandler {
 
-    private SeasonsDao seasonsDao;
+    private final SeasonsDao seasonsDao;
 
     public SeasonsHandler(SeasonsDao seasonsDao) {
         this.seasonsDao = seasonsDao;

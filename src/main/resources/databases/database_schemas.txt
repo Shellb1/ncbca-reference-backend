@@ -21,3 +21,30 @@ CREATE TABLE Seasons (
     season INT,
     PRIMARY KEY (team_id, season)
 );
+
+sqlite3 games.db;
+
+CREATE TABLE Games (
+    game_id INT,
+    season INT,
+    neutral_site BOOLEAN,
+    home_team_id INT,
+    away_team_id INT,
+    home_team_score INT,
+    away_team_score INT,
+    home_team_name VARCHAR(255),
+    away_team_name VARCHAR(255),
+    PRIMARY KEY (game_id, season)
+);
+
+CREATE TABLE Coaches (
+    coach_name VARCHAR(255) PRIMARY KEY,
+    start_season INT,
+    end_season INT,
+    active BOOLEAN,
+    current_team VARCHAR(255)
+);
+
+
+
+

@@ -18,7 +18,7 @@ public class SeasonsDao {
     public void load(List<Season> seasons) {
 
         try (Connection conn = this.connect()) {
-            for (Season season: seasons) {
+            for (Season season : seasons) {
                 PreparedStatement pstmt = conn.prepareStatement(INSERT_STRING);
                 pstmt.setInt(1, season.teamId());
                 pstmt.setString(2, season.teamName());

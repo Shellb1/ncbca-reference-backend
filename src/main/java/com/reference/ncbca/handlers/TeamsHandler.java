@@ -9,14 +9,14 @@ import java.util.List;
 @Service
 public class TeamsHandler {
 
-    private TeamsDao teamsDao;
+    private final TeamsDao teamsDao;
 
     public TeamsHandler(TeamsDao teamsDao) {
         this.teamsDao = teamsDao;
     }
 
-    public Team getTeam(String id) {
-        return null;
+    public Team getTeam(Integer id) {
+        return teamsDao.get(id);
     }
 
     public void loadTeams(List<Team> teams) {
