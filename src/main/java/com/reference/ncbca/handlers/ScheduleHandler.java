@@ -18,4 +18,8 @@ public class ScheduleHandler {
     public void load(List<ScheduleGame> games) {
         scheduleDao.load(games);
     }
+
+    public List<ScheduleGame> getEntireSchedule() {
+        return scheduleDao.getEntireSchedule();
+    }
 }

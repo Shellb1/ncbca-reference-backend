@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -12,7 +11,6 @@ import com.reference.ncbca.model.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,13 +24,15 @@ public class LoadExportHandler {
     private final SeasonsHandler seasonsHandler;
     private final ScheduleHandler scheduleHandler;
     private final CoachesHandler coachesHandler;
+    private final GamesHandler gamesHandler;
 
-    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler) {
+    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler) {
         this.conferencesMap = conferencesMap;
         this.teamsHandler = teamsHandler;
         this.seasonsHandler = seasonsHandler;
         this.scheduleHandler = scheduleHandler;
         this.coachesHandler = coachesHandler;
+        this.gamesHandler = gamesHandler;
     }
 
 
@@ -51,18 +51,7 @@ public class LoadExportHandler {
         ObjectNode export = mapper.readTree(parser);
 
         if (loadCoaches) {
-            List<Coach> coaches = new ArrayList<>();
-            try (CSVReader reader = new CSVReader(new FileReader("src/main/resources/databases/coaches.csv"))) {
-                List<String[]> lines = reader.readAll();
-                for (String[] line: lines) {
-                    if (!line[1].isBlank()) {
-                        Coach coach = new Coach(line[1], 2078, null, true, line[0]);
-                        coaches.add(coach);
-                    }
-                }
-            } catch (CsvException e) {
-                throw new RuntimeException(e);
-            }
+            List<Coach> coaches = getCoachList();
             coachesHandler.load(coaches);
         }
         if (loadTeams) {
@@ -94,17 +83,42 @@ public class LoadExportHandler {
                 Integer seasonYear = jsonTeam.get("seasons").get(seasonsArraySize - 1).get("season").intValue();
                 Integer gamesWon = jsonTeam.get("seasons").get(seasonsArraySize - 1).get("won").intValue();
                 Integer gamesLost = jsonTeam.get("seasons").get(seasonsArraySize - 1).get("lost").intValue();
-                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, seasonYear));
+                Coach coachOfTeam = coachesHandler.getCoachOfTeam(teamName);
+                String coachName = null;
+                if (coachOfTeam != null) {
+                    coachName = coachOfTeam.coachName();
+                }
+                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName));
             }
             seasonsHandler.load(seasons);
         }
 
         if (loadGames) {
-            List<Game> games = new ArrayList<>();
+            List<Game> gamesPlayed = new ArrayList<>();
             JsonNode gamesArray = export.get("games");
+            List<ScheduleGame> scheduledGames = scheduleHandler.getEntireSchedule();
             for (JsonNode game : gamesArray) {
-                System.out.println(game);
+                Integer gameId = game.get("gid").intValue();
+                Integer season = game.get("season").intValue();
+                Boolean neutralSite = false; // no way to determine this unless game is in playoffs phase
+                Integer homeTeamId = scheduledGames.stream().filter(scheduleGame1 -> scheduleGame1.gameId().equals(gameId)).toList().getFirst().homeTeamId();
+                Integer awayTeamId = scheduledGames.stream().filter(scheduleGame1 -> scheduleGame1.gameId().equals(gameId)).toList().getFirst().awayTeamId();
+                String homeTeamName = determineTeamFromTid(homeTeamId);
+                String awayTeamName = determineTeamFromTid(awayTeamId);
+                Integer winningTeamId = game.get("won").get("tid").intValue();
+                String winningTeamName = determineTeamFromTid(winningTeamId);
+                Integer winningTeamScore = game.get("won").get("pts").intValue();
+                Integer losingTeamId = game.get("lost").get("tid").intValue();
+                String losingTeamName = determineTeamFromTid(losingTeamId);
+                Integer losingTeamScore = game.get("lost").get("pts").intValue();
+                Game gamePlayed = new Game(gameId, season, neutralSite,
+                        homeTeamId, awayTeamId, homeTeamName, awayTeamName,
+                        winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
+                        losingTeamName, losingTeamScore);
+                gamesPlayed.add(gamePlayed);
             }
+            gamesHandler.load(gamesPlayed);
+
         }
 
         if (loadSchedules) {
@@ -126,6 +140,22 @@ public class LoadExportHandler {
 
 
         parser.close();
+    }
+
+    private static List<Coach> getCoachList() throws IOException {
+        List<Coach> coaches = new ArrayList<>();
+        try (CSVReader reader = new CSVReader(new FileReader("src/main/resources/databases/coaches.csv"))) {
+            List<String[]> lines = reader.readAll();
+            for (String[] line : lines) {
+                if (!line[1].isBlank()) {
+                    Coach coach = new Coach(line[1], 2078, null, true, line[0]);
+                    coaches.add(coach);
+                }
+            }
+        } catch (CsvException e) {
+            throw new RuntimeException(e);
+        }
+        return coaches;
     }
 
     private Integer determineSeasonFromAttributes(JsonNode gameAttributes) {
