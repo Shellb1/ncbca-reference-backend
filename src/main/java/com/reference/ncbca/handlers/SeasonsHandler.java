@@ -24,7 +24,7 @@ public class SeasonsHandler {
         return seasonsDao.findSeasonsByYear(year);
     }
 
-    public void loadSeason() {
-
+    public List<Season> listSeasonsForCoach(String coach) {
+        return seasonsDao.findSeasonsByCoachName(coach);
     }
 }

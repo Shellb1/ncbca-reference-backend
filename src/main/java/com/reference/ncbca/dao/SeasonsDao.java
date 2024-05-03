@@ -13,8 +13,9 @@ import java.util.List;
 public class SeasonsDao {
 
     private static final String CONNECTION_STRING = "jdbc:sqlite:src/main/resources/databases/seasons.db";
-    private static final String INSERT_STRING = "INSERT INTO Seasons (team_id, team_name, coach_name, games_won, games_lost, season) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_SQL = "INSERT INTO Seasons (team_id, team_name, coach_name, games_won, games_lost, season) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String FIND_SEASONS_BY_YEAR_SQL = "SELECT * FROM Seasons WHERE season = ?";
+    private static final String FIND_SEASONS_BY_COACH_SQL = "SELECT * FROM Seasons WHERE coach_name = ?";
 
     private final SeasonsMapper mapper;
 
@@ -25,7 +26,7 @@ public class SeasonsDao {
 
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             for (Season season : seasons) {
-                PreparedStatement pstmt = conn.prepareStatement(INSERT_STRING);
+                PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
                 pstmt.setInt(1, season.teamId());
                 pstmt.setString(2, season.teamName());
                 if (season.coach() != null) {
@@ -48,6 +49,18 @@ public class SeasonsDao {
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement preparedStatement = conn.prepareStatement(FIND_SEASONS_BY_YEAR_SQL);
             preparedStatement.setInt(1, year);
+            ResultSet results = preparedStatement.executeQuery();
+            return mapper.mapResult(results);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    public List<Season> findSeasonsByCoachName(String coachName) {
+        try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement preparedStatement = conn.prepareStatement(FIND_SEASONS_BY_COACH_SQL);
+            preparedStatement.setString(1, coachName);
             ResultSet results = preparedStatement.executeQuery();
             return mapper.mapResult(results);
         } catch (SQLException e) {
