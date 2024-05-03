@@ -24,7 +24,8 @@ public class AdminController {
                            @RequestParam("loadSeasons") Boolean loadSeasons,
                            @RequestParam("loadGames") Boolean loadGames,
                            @RequestParam("loadSchedules") Boolean loadSchedules,
-                           @RequestParam("loadCoaches") Boolean loadCoaches) throws IOException {
-        loadExportHandler.loadExport(export, loadTeams, loadSeasons, loadGames, loadSchedules, loadCoaches);
+                           @RequestParam("loadCoaches") Boolean loadCoaches,
+                           @RequestParam("season") Integer season) throws IOException {
+        loadExportHandler.loadExport(export, loadTeams, loadSeasons, loadGames, loadSchedules, loadCoaches, season);
     }
 }

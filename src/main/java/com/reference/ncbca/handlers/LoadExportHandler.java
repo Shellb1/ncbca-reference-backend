@@ -36,7 +36,7 @@ public class LoadExportHandler {
     }
 
 
-    public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons, Boolean loadGames, Boolean loadSchedules, Boolean loadCoaches) throws IOException {
+    public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons, Boolean loadGames, Boolean loadSchedules, Boolean loadCoaches, Integer season) throws IOException {
         byte[] fileBytes = file.getBytes();
 
         // Remove BOM if present
@@ -79,16 +79,22 @@ public class LoadExportHandler {
             for (JsonNode jsonTeam : teamsArray) {
                 String teamName = jsonTeam.get("region").textValue() + " " + jsonTeam.get("name").textValue();
                 Integer teamId = jsonTeam.get("tid").intValue();
-                int seasonsArraySize = jsonTeam.get("seasons").size();
-                Integer seasonYear = jsonTeam.get("seasons").get(seasonsArraySize - 1).get("season").intValue();
-                Integer gamesWon = jsonTeam.get("seasons").get(seasonsArraySize - 1).get("won").intValue();
-                Integer gamesLost = jsonTeam.get("seasons").get(seasonsArraySize - 1).get("lost").intValue();
+                JsonNode seasonsArray = jsonTeam.get("seasons");
+                JsonNode seasonToEnter = null;
+                for (JsonNode seasonJson: seasonsArray) {
+                    if (seasonJson.get("season").intValue() == season) {
+                        seasonToEnter = seasonJson;
+                        break;
+                    }
+                }
+                Integer gamesWon = seasonToEnter.get("won").intValue();
+                Integer gamesLost = seasonToEnter.get("lost").intValue();
                 Coach coachOfTeam = coachesHandler.getCoachOfTeam(teamName);
                 String coachName = null;
                 if (coachOfTeam != null) {
                     coachName = coachOfTeam.coachName();
                 }
-                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName));
+                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, season, coachName));
             }
             seasonsHandler.load(seasons);
         }
@@ -99,7 +105,7 @@ public class LoadExportHandler {
             List<ScheduleGame> scheduledGames = scheduleHandler.getEntireSchedule();
             for (JsonNode game : gamesArray) {
                 Integer gameId = game.get("gid").intValue();
-                Integer season = game.get("season").intValue();
+                Integer seasonYear = game.get("season").intValue();
                 Boolean neutralSite = false; // no way to determine this unless game is in playoffs phase
                 Integer homeTeamId = scheduledGames.stream().filter(scheduleGame1 -> scheduleGame1.gameId().equals(gameId)).toList().getFirst().homeTeamId();
                 Integer awayTeamId = scheduledGames.stream().filter(scheduleGame1 -> scheduleGame1.gameId().equals(gameId)).toList().getFirst().awayTeamId();
@@ -111,7 +117,7 @@ public class LoadExportHandler {
                 Integer losingTeamId = game.get("lost").get("tid").intValue();
                 String losingTeamName = determineTeamFromTid(losingTeamId);
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
-                Game gamePlayed = new Game(gameId, season, neutralSite,
+                Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
                         losingTeamName, losingTeamScore);
@@ -124,8 +130,6 @@ public class LoadExportHandler {
         if (loadSchedules) {
             List<ScheduleGame> games = new ArrayList<>();
             JsonNode gamesArray = export.get("schedule");
-            JsonNode exportAttributes = export.get("gameAttributes");
-            Integer season = determineSeasonFromAttributes(exportAttributes);
             for (JsonNode game : gamesArray) {
                 Integer gameId = game.get("gid").intValue();
                 Integer homeTeamId = game.get("homeTid").intValue();
@@ -137,8 +141,6 @@ public class LoadExportHandler {
             }
             scheduleHandler.load(games);
         }
-
-
         parser.close();
     }
 

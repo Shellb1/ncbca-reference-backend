@@ -16,6 +16,15 @@ public class SeasonsHandler {
     }
 
     public void load(List<Season> seasons) {
+
         seasonsDao.load(seasons);
+    }
+
+    public List<Season> listSeasonsForYear(Integer year) {
+        return seasonsDao.findSeasonsByYear(year);
+    }
+
+    public void loadSeason() {
+
     }
 }
