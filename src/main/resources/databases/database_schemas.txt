@@ -60,6 +60,15 @@ CREATE TABLE Schedule (
     PRIMARY KEY(game_id, season)
 );
 
+CREATE TABLE inactive_teams (
+    team_id INT,
+    team_name VARCHAR(100),
+    conference_id INT,
+    conference_name VARCHAR(100),
+    last_active_year INT,
+    PRIMARY KEY(team_id, team_name)
+);
+
 
 
 

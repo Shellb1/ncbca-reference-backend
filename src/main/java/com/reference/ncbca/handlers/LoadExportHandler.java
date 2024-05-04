@@ -36,7 +36,7 @@ public class LoadExportHandler {
     }
 
 
-    public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons, Boolean loadGames, Boolean loadSchedules, Boolean loadCoaches, Integer season) throws IOException {
+    public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons, Boolean loadGames, Boolean loadSchedules, Boolean loadCoaches, Integer season, Boolean loadCt, Boolean loadNIT, Boolean loadFirstFour, Boolean loadNT) throws IOException {
         byte[] fileBytes = file.getBytes();
 
         // Remove BOM if present
@@ -99,10 +99,11 @@ public class LoadExportHandler {
             seasonsHandler.load(seasons);
         }
 
+        // only used for regular season games, use CT/NIT/First Four/NT options for postseason play
         if (loadGames) {
             List<Game> gamesPlayed = new ArrayList<>();
             JsonNode gamesArray = export.get("games");
-            List<ScheduleGame> scheduledGames = scheduleHandler.getEntireSchedule();
+            List<ScheduleGame> scheduledGames = scheduleHandler.getEntireSchedule(season);
             for (JsonNode game : gamesArray) {
                 Integer gameId = game.get("gid").intValue();
                 Integer seasonYear = game.get("season").intValue();
@@ -123,7 +124,7 @@ public class LoadExportHandler {
                         losingTeamName, losingTeamScore);
                 gamesPlayed.add(gamePlayed);
             }
-            gamesHandler.load(gamesPlayed);
+           gamesHandler.load(gamesPlayed);
 
         }
 
@@ -140,6 +141,35 @@ public class LoadExportHandler {
                 games.add(scheduleGame);
             }
             scheduleHandler.load(games);
+        }
+
+        if (loadCt) {
+            JsonNode games = export.get("games");
+            List<Game> gamesPlayed = new ArrayList<>();
+            for (JsonNode game: games) {
+                Integer gameId = game.get("gid").intValue();
+
+                // loading CTs means all games are neutral site, home/away is irrelevant
+                Boolean neutralSite = true;
+                Integer seasonYear = game.get("season").intValue();
+                Integer homeTeamId = game.get("won").get("tid").intValue();
+                Integer awayTeamId = game.get("lost").get("tid").intValue();
+                String homeTeamName = determineTeamFromTid(homeTeamId);
+                String awayTeamName = determineTeamFromTid(awayTeamId);
+
+                Integer winningTeamId = game.get("won").get("tid").intValue();
+                String winningTeamName = determineTeamFromTid(winningTeamId);
+                Integer winningTeamScore = game.get("won").get("pts").intValue();
+                Integer losingTeamId = game.get("lost").get("tid").intValue();
+                String losingTeamName = determineTeamFromTid(losingTeamId);
+                Integer losingTeamScore = game.get("lost").get("pts").intValue();
+                Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
+                        homeTeamId, awayTeamId, homeTeamName, awayTeamName,
+                        winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
+                        losingTeamName, losingTeamScore);
+                gamesPlayed.add(gamePlayed);
+            }
+            gamesHandler.load(gamesPlayed);
         }
         parser.close();
     }
@@ -158,16 +188,6 @@ public class LoadExportHandler {
             throw new RuntimeException(e);
         }
         return coaches;
-    }
-
-    private Integer determineSeasonFromAttributes(JsonNode gameAttributes) {
-        for (Iterator<JsonNode> it = gameAttributes.elements(); it.hasNext(); ) {
-            JsonNode attribute = it.next();
-            if ("season".equals(attribute.get("key").textValue())) {
-                return attribute.get("value").intValue();
-            }
-        }
-        return null;
     }
 
     private String determineTeamFromTid(Integer homeTeamId) {

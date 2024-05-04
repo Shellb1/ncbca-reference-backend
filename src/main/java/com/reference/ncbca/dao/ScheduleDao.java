@@ -14,7 +14,7 @@ public class ScheduleDao {
 
     private static final String CONNECTION_STRING = "jdbc:sqlite:src/main/resources/databases/schedule.db";
     private static final String INSERT_SQL = "INSERT INTO Schedule (game_id, season, home_team_id, away_team_id, home_team_name, away_team_name) VALUES (?, ?, ?, ?, ?, ?)";
-    private static final String LIST_ALL_SQL = "SELECT * FROM Schedule";
+    private static final String LIST_ALL_SQL = "SELECT * FROM Schedule WHERE season = ?";
 
     private final ScheduleMapper mapper;
 
@@ -41,9 +41,10 @@ public class ScheduleDao {
         }
     }
 
-    public List<ScheduleGame> getEntireSchedule() {
+    public List<ScheduleGame> getEntireSchedule(Integer year) {
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(LIST_ALL_SQL);
+            pstmt.setInt(1, year);
             ResultSet results = pstmt.executeQuery();
             return mapper.mapResult(results);
         } catch (SQLException e) {

@@ -19,7 +19,7 @@ public class ScheduleHandler {
         scheduleDao.load(games);
     }
 
-    public List<ScheduleGame> getEntireSchedule() {
-        return scheduleDao.getEntireSchedule();
+    public List<ScheduleGame> getEntireSchedule(Integer year) {
+        return scheduleDao.getEntireSchedule(year);
     }
 }
