@@ -217,7 +217,7 @@ public class LoadExportHandler {
             nitHandler.load(nitGames);
         }
 
-        if (loadFirstFour) {
+        if (loadFirstFour || loadNT) {
             JsonNode games = export.get("games");
             List<Game> gamesPlayed = new ArrayList<>();
             List<NtGame> ntGames = new ArrayList<>();
