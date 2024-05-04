@@ -25,6 +25,15 @@ public class SeasonsMapper {
             resultList.add(season);
         }
         return resultList;
+    }
 
+    public Season mapSingleResult(ResultSet resultSet) throws SQLException {
+        Integer teamId = resultSet.getInt("team_id");
+        Integer seasonYear = resultSet.getInt("season");
+        String coachName = resultSet.getString("coach_name");
+        String teamName = resultSet.getString("team_name");
+        Integer gamesWon = resultSet.getInt("games_won");
+        Integer gamesLost = resultSet.getInt("games_lost");
+        return new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName);
     }
 }

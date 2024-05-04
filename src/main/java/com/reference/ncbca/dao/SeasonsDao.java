@@ -16,6 +16,7 @@ public class SeasonsDao {
     private static final String INSERT_SQL = "INSERT INTO Seasons (team_id, team_name, coach_name, games_won, games_lost, season) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String FIND_SEASONS_BY_YEAR_SQL = "SELECT * FROM Seasons WHERE season = ?";
     private static final String FIND_SEASONS_BY_COACH_SQL = "SELECT * FROM Seasons WHERE coach_name = ?";
+    private static final String GET_SEASON_BY_TEAM_AND_YEAR_SQL = "SELECT * FROM Seasons WHERE team_name = ? AND season = ?";
 
     private final SeasonsMapper mapper;
 
@@ -67,5 +68,18 @@ public class SeasonsDao {
             System.out.println(e.getMessage());
         }
         return new ArrayList<>();
+    }
+
+    public Season getSeasonForTeamAndYear(String teamName, Integer year) {
+        try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement preparedStatement = conn.prepareStatement(GET_SEASON_BY_TEAM_AND_YEAR_SQL);
+            preparedStatement.setString(1, teamName);
+            preparedStatement.setInt(2, year);
+            ResultSet result = preparedStatement.executeQuery();
+            return mapper.mapSingleResult(result);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }

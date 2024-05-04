@@ -1,11 +1,13 @@
 package com.reference.ncbca.dao;
 
+import com.reference.ncbca.dao.mappers.GamesMapper;
 import com.reference.ncbca.model.Game;
 import com.reference.ncbca.model.Season;
 import com.reference.ncbca.util.DaoHelper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -13,6 +15,25 @@ public class GamesDao {
 
     private static final String CONNECTION_STRING = "jdbc:sqlite:src/main/resources/databases/games.db";
     private static final String INSERT_SQL = "INSERT INTO Games (game_id, season, neutral_site, home_team_id, away_team_id, home_team_name, away_team_name, winning_team_id, winning_team_name, winning_team_score, losing_team_id, losing_team_name, losing_team_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String GET_GAMES_FOR_TEAM_BY_YEAR_SQL = "SELECT * FROM Games WHERE (home_team_name = ? OR away_team_name = ?) AND season = ?";
+    private final GamesMapper mapper;
+
+    public GamesDao(GamesMapper mapper) {
+        this.mapper = mapper;
+    }
+    public List<Game> getGamesForTeamByYear(String teamName, Integer year) {
+        try (Connection connection = DaoHelper.connect(CONNECTION_STRING);
+             PreparedStatement statement = connection.prepareStatement(GET_GAMES_FOR_TEAM_BY_YEAR_SQL)) {
+            statement.setString(1, teamName);
+            statement.setString(2, teamName);
+            statement.setInt(3, year);
+            ResultSet resultSet = statement.executeQuery();
+            return mapper.mapResult(resultSet);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
 
     public void load(List<Game> games) {
 
