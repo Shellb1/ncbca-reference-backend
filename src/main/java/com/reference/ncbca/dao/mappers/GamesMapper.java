@@ -35,4 +35,8 @@ public class GamesMapper {
 
         return games;
     }
+
+    public Integer mapResultForLatestGameId(ResultSet set) throws SQLException {
+        return set.getInt("largest_id");
+    }
 }

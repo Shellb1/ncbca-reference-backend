@@ -19,4 +19,8 @@ public class GamesHandler {
         gamesDao.load(games);
     }
 
+    public Integer getLatestGameId(Integer season) {
+        return gamesDao.getLatestGameForSeason(season);
+    }
+
 }

@@ -60,6 +60,14 @@ CREATE TABLE Schedule (
     PRIMARY KEY(game_id, season)
 );
 
+// Simple table to keep track of which teams are in the NIT
+
+CREATE TABLE nit (
+    game_id INT,
+    season INT,
+    PRIMARY KEY(game_id, season)
+);
+
 CREATE TABLE inactive_teams (
     team_id INT,
     team_name VARCHAR(100),
@@ -68,7 +76,6 @@ CREATE TABLE inactive_teams (
     last_active_year INT,
     PRIMARY KEY(team_id, team_name)
 );
-
 
 
 

@@ -16,6 +16,7 @@ public class GamesDao {
     private static final String CONNECTION_STRING = "jdbc:sqlite:src/main/resources/databases/games.db";
     private static final String INSERT_SQL = "INSERT INTO Games (game_id, season, neutral_site, home_team_id, away_team_id, home_team_name, away_team_name, winning_team_id, winning_team_name, winning_team_score, losing_team_id, losing_team_name, losing_team_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String GET_GAMES_FOR_TEAM_BY_YEAR_SQL = "SELECT * FROM Games WHERE (home_team_name = ? OR away_team_name = ?) AND season = ?";
+    private static final String GET_LATEST_GAME_ID_FOR_SEASON = "SELECT MAX(game_id) AS largest_id FROM Games WHERE season = ?";
     private final GamesMapper mapper;
 
     public GamesDao(GamesMapper mapper) {
@@ -64,6 +65,18 @@ public class GamesDao {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public Integer getLatestGameForSeason(Integer season) {
+        try (Connection connection = DaoHelper.connect(CONNECTION_STRING);
+             PreparedStatement statement = connection.prepareStatement(GET_LATEST_GAME_ID_FOR_SEASON)) {
+            statement.setInt(1, season);
+            ResultSet resultSet = statement.executeQuery();
+            return mapper.mapResultForLatestGameId(resultSet);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     private boolean isGameExists(Connection conn, int gameId, int season) throws SQLException {
