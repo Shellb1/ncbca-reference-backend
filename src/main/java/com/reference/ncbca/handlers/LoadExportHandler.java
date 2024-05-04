@@ -26,8 +26,9 @@ public class LoadExportHandler {
     private final CoachesHandler coachesHandler;
     private final GamesHandler gamesHandler;
     private final NitHandler nitHandler;
+    private final NtHandler ntHandler;
 
-    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, NitHandler nitHandler) {
+    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, NitHandler nitHandler, NtHandler ntHandler) {
         this.conferencesMap = conferencesMap;
         this.teamsHandler = teamsHandler;
         this.seasonsHandler = seasonsHandler;
@@ -35,6 +36,7 @@ public class LoadExportHandler {
         this.coachesHandler = coachesHandler;
         this.gamesHandler = gamesHandler;
         this.nitHandler = nitHandler;
+        this.ntHandler = ntHandler;
     }
 
 
@@ -213,7 +215,47 @@ public class LoadExportHandler {
 
             // keep track of NIT games for each season
             nitHandler.load(nitGames);
-            System.out.println(nitGames);
+        }
+
+        if (loadFirstFour) {
+            JsonNode games = export.get("games");
+            List<Game> gamesPlayed = new ArrayList<>();
+            List<NtGame> ntGames = new ArrayList<>();
+            Integer currentGameId = gamesHandler.getLatestGameId(season);
+            for (JsonNode game: games) {
+                // not great for if we expand but will deal with when we get there!
+                if (game.get("gid").intValue() <= 2295) {
+                    continue;
+                }
+                currentGameId++;
+                // loading first four means game ids are after CT ids (differ from export because we split postseasons tournaments)
+                Integer gameId = currentGameId;
+
+                // loading NT means means neutral site game, home/away is irrelevant
+                Boolean neutralSite = true;
+                Integer seasonYear = game.get("season").intValue();
+                Integer homeTeamId = game.get("won").get("tid").intValue();
+                Integer awayTeamId = game.get("lost").get("tid").intValue();
+                String homeTeamName = determineTeamFromTid(homeTeamId);
+                String awayTeamName = determineTeamFromTid(awayTeamId);
+
+                Integer winningTeamId = game.get("won").get("tid").intValue();
+                String winningTeamName = determineTeamFromTid(winningTeamId);
+                Integer winningTeamScore = game.get("won").get("pts").intValue();
+                Integer losingTeamId = game.get("lost").get("tid").intValue();
+                String losingTeamName = determineTeamFromTid(losingTeamId);
+                Integer losingTeamScore = game.get("lost").get("pts").intValue();
+                Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
+                        homeTeamId, awayTeamId, homeTeamName, awayTeamName,
+                        winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
+                        losingTeamName, losingTeamScore);
+                gamesPlayed.add(gamePlayed);
+                NtGame ntGame = new NtGame(gameId, season);
+                ntGames.add(ntGame);
+            }
+            gamesHandler.load(gamesPlayed);
+            // keep track of NT games for each season
+            ntHandler.load(ntGames);
         }
         parser.close();
     }

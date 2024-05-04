@@ -68,6 +68,22 @@ CREATE TABLE nit (
     PRIMARY KEY(game_id, season)
 );
 
+// both of these belong in nt database
+
+CREATE TABLE nt_games (
+    game_id INT,
+    season INT,
+    PRIMARY KEY(game_id, season)
+);
+
+CREATE TABLE nt_teams (
+    team_id INT,
+    season INT,
+    seed INT,
+    champion BOOLEAN,
+    PRIMARY KEY(team_id, season)
+);
+
 CREATE TABLE inactive_teams (
     team_id INT,
     team_name VARCHAR(100),
