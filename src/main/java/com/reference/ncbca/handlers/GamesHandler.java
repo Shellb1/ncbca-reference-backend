@@ -15,8 +15,8 @@ public class GamesHandler {
         this.gamesDao = gamesDao;
     }
 
-    public void load(List<Game> games) {
-        gamesDao.load(games);
+    public void load(List<Game> games, Integer season) {
+        gamesDao.load(games, season);
     }
 
     public Integer getLatestGameId(Integer season) {

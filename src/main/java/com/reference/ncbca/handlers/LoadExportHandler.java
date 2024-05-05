@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import com.reference.ncbca.model.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +17,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class LoadExportHandler {
@@ -27,6 +30,9 @@ public class LoadExportHandler {
     private final GamesHandler gamesHandler;
     private final NitHandler nitHandler;
     private final NtHandler ntHandler;
+
+    @Value("classpath:databases/coaches.csv")
+    private Resource coachesCsv;
 
     public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, NitHandler nitHandler, NtHandler ntHandler) {
         this.conferencesMap = conferencesMap;
@@ -105,6 +111,8 @@ public class LoadExportHandler {
 
         // only used for regular season games, use CT/NIT/First Four/NT options for postseason play
         if (loadGames) {
+            // assumes teams have been loaded
+            List<Team> allTeams = teamsHandler.listAllTeams();
             List<Game> gamesPlayed = new ArrayList<>();
             JsonNode gamesArray = export.get("games");
             List<ScheduleGame> scheduledGames = scheduleHandler.getEntireSchedule(season);
@@ -114,13 +122,13 @@ public class LoadExportHandler {
                 Boolean neutralSite = false; // no way to determine this unless game is in playoffs phase
                 Integer homeTeamId = scheduledGames.stream().filter(scheduleGame1 -> scheduleGame1.gameId().equals(gameId)).toList().getFirst().homeTeamId();
                 Integer awayTeamId = scheduledGames.stream().filter(scheduleGame1 -> scheduleGame1.gameId().equals(gameId)).toList().getFirst().awayTeamId();
-                String homeTeamName = determineTeamFromTid(homeTeamId);
-                String awayTeamName = determineTeamFromTid(awayTeamId);
+                String homeTeamName = determineTeamFromTid(homeTeamId, allTeams);
+                String awayTeamName = determineTeamFromTid(awayTeamId, allTeams);
                 Integer winningTeamId = game.get("won").get("tid").intValue();
-                String winningTeamName = determineTeamFromTid(winningTeamId);
+                String winningTeamName = determineTeamFromTid(winningTeamId, allTeams);
                 Integer winningTeamScore = game.get("won").get("pts").intValue();
                 Integer losingTeamId = game.get("lost").get("tid").intValue();
-                String losingTeamName = determineTeamFromTid(losingTeamId);
+                String losingTeamName = determineTeamFromTid(losingTeamId, allTeams);
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
@@ -128,19 +136,21 @@ public class LoadExportHandler {
                         losingTeamName, losingTeamScore);
                 gamesPlayed.add(gamePlayed);
             }
-           gamesHandler.load(gamesPlayed);
+           gamesHandler.load(gamesPlayed, season);
 
         }
 
         if (loadSchedules) {
+            // assuming active teams have already been loaded
+            List<Team> teams = teamsHandler.listAllTeams();
             List<ScheduleGame> games = new ArrayList<>();
             JsonNode gamesArray = export.get("schedule");
             for (JsonNode game : gamesArray) {
                 Integer gameId = game.get("gid").intValue();
                 Integer homeTeamId = game.get("homeTid").intValue();
                 Integer awayTeamId = game.get("awayTid").intValue();
-                String homeTeamName = determineTeamFromTid(homeTeamId);
-                String awayTeamName = determineTeamFromTid(awayTeamId);
+                String homeTeamName = determineTeamFromTid(homeTeamId, teams);
+                String awayTeamName = determineTeamFromTid(awayTeamId, teams);
                 ScheduleGame scheduleGame = new ScheduleGame(gameId, season, homeTeamId, awayTeamId, homeTeamName, awayTeamName);
                 games.add(scheduleGame);
             }
@@ -148,6 +158,8 @@ public class LoadExportHandler {
         }
 
         if (loadCt) {
+            // assuming active teams have already been loaded
+            List<Team> teams = teamsHandler.listAllTeams();
             JsonNode games = export.get("games");
             List<Game> gamesPlayed = new ArrayList<>();
             for (JsonNode game: games) {
@@ -158,14 +170,14 @@ public class LoadExportHandler {
                 Integer seasonYear = game.get("season").intValue();
                 Integer homeTeamId = game.get("won").get("tid").intValue();
                 Integer awayTeamId = game.get("lost").get("tid").intValue();
-                String homeTeamName = determineTeamFromTid(homeTeamId);
-                String awayTeamName = determineTeamFromTid(awayTeamId);
+                String homeTeamName = determineTeamFromTid(homeTeamId, teams);
+                String awayTeamName = determineTeamFromTid(awayTeamId, teams);
 
                 Integer winningTeamId = game.get("won").get("tid").intValue();
-                String winningTeamName = determineTeamFromTid(winningTeamId);
+                String winningTeamName = determineTeamFromTid(winningTeamId, teams);
                 Integer winningTeamScore = game.get("won").get("pts").intValue();
                 Integer losingTeamId = game.get("lost").get("tid").intValue();
-                String losingTeamName = determineTeamFromTid(losingTeamId);
+                String losingTeamName = determineTeamFromTid(losingTeamId, teams);
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
@@ -173,13 +185,15 @@ public class LoadExportHandler {
                         losingTeamName, losingTeamScore);
                 gamesPlayed.add(gamePlayed);
             }
-            gamesHandler.load(gamesPlayed);
+            gamesHandler.load(gamesPlayed, season);
         }
 
         if (loadNIT) {
             JsonNode games = export.get("games");
             List<Game> gamesPlayed = new ArrayList<>();
             List<NitGame> nitGames = new ArrayList<>();
+            // assumes all teams have been loaded
+            List<Team> allTeams = teamsHandler.listAllTeams();
             Integer currentGameId = gamesHandler.getLatestGameId(season);
             for (JsonNode game: games) {
                 if (game.get("gid").intValue() <= currentGameId) {
@@ -194,14 +208,14 @@ public class LoadExportHandler {
                 Integer seasonYear = game.get("season").intValue();
                 Integer homeTeamId = game.get("won").get("tid").intValue();
                 Integer awayTeamId = game.get("lost").get("tid").intValue();
-                String homeTeamName = determineTeamFromTid(homeTeamId);
-                String awayTeamName = determineTeamFromTid(awayTeamId);
+                String homeTeamName = determineTeamFromTid(homeTeamId, allTeams);
+                String awayTeamName = determineTeamFromTid(awayTeamId, allTeams);
 
                 Integer winningTeamId = game.get("won").get("tid").intValue();
-                String winningTeamName = determineTeamFromTid(winningTeamId);
+                String winningTeamName = determineTeamFromTid(winningTeamId, allTeams);
                 Integer winningTeamScore = game.get("won").get("pts").intValue();
                 Integer losingTeamId = game.get("lost").get("tid").intValue();
-                String losingTeamName = determineTeamFromTid(losingTeamId);
+                String losingTeamName = determineTeamFromTid(losingTeamId, allTeams);
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
@@ -211,7 +225,7 @@ public class LoadExportHandler {
                 NitGame nitGame = new NitGame(gameId, season);
                 nitGames.add(nitGame);
             }
-            gamesHandler.load(gamesPlayed);
+            gamesHandler.load(gamesPlayed, season);
 
             // keep track of NIT games for each season
             nitHandler.load(nitGames);
@@ -221,6 +235,8 @@ public class LoadExportHandler {
             JsonNode games = export.get("games");
             List<Game> gamesPlayed = new ArrayList<>();
             List<NtGame> ntGames = new ArrayList<>();
+            // assumes all teams have been loaded
+            List<Team> allTeams = teamsHandler.listAllTeams();
             Integer currentGameId = gamesHandler.getLatestGameId(season);
             for (JsonNode game: games) {
                 // not great for if we expand but will deal with when we get there!
@@ -236,14 +252,14 @@ public class LoadExportHandler {
                 Integer seasonYear = game.get("season").intValue();
                 Integer homeTeamId = game.get("won").get("tid").intValue();
                 Integer awayTeamId = game.get("lost").get("tid").intValue();
-                String homeTeamName = determineTeamFromTid(homeTeamId);
-                String awayTeamName = determineTeamFromTid(awayTeamId);
+                String homeTeamName = determineTeamFromTid(homeTeamId, allTeams);
+                String awayTeamName = determineTeamFromTid(awayTeamId, allTeams);
 
                 Integer winningTeamId = game.get("won").get("tid").intValue();
-                String winningTeamName = determineTeamFromTid(winningTeamId);
+                String winningTeamName = determineTeamFromTid(winningTeamId, allTeams);
                 Integer winningTeamScore = game.get("won").get("pts").intValue();
                 Integer losingTeamId = game.get("lost").get("tid").intValue();
-                String losingTeamName = determineTeamFromTid(losingTeamId);
+                String losingTeamName = determineTeamFromTid(losingTeamId, allTeams);
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
@@ -253,16 +269,16 @@ public class LoadExportHandler {
                 NtGame ntGame = new NtGame(gameId, season);
                 ntGames.add(ntGame);
             }
-            gamesHandler.load(gamesPlayed);
+            gamesHandler.load(gamesPlayed, season);
             // keep track of NT games for each season
             ntHandler.load(ntGames);
         }
         parser.close();
     }
 
-    private static List<Coach> getCoachList() throws IOException {
+    private List<Coach> getCoachList() throws IOException {
         List<Coach> coaches = new ArrayList<>();
-        try (CSVReader reader = new CSVReader(new FileReader("src/main/resources/databases/coaches.csv"))) {
+        try (CSVReader reader = new CSVReader(new FileReader(coachesCsv.getFile()))) {
             List<String[]> lines = reader.readAll();
             for (String[] line : lines) {
                 if (!line[1].isBlank()) {
@@ -276,8 +292,13 @@ public class LoadExportHandler {
         return coaches;
     }
 
-    private String determineTeamFromTid(Integer homeTeamId) {
-        return teamsHandler.getTeam(homeTeamId).name();
+    private String determineTeamFromTid(Integer teamId, List<Team> teams) {
+        for (Team team: teams) {
+            if (team.teamId().equals(teamId)) {
+                return team.name();
+            }
+        }
+        return "";
     }
 
 }

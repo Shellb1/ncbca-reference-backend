@@ -31,6 +31,10 @@ public class TeamsHandler {
         teamsDao.insert(teams);
     }
 
+    public List<Team> listAllTeams() {
+        return teamsDao.listAllTeams();
+    }
+
     public TeamSummary buildTeamSummary(String teamName, Integer year) {
         List<Game> games = gamesDao.getGamesForTeamByYear(teamName, year);
         Season teamSeason = seasonsHandler.getSeasonForTeamAndYear(teamName, year);

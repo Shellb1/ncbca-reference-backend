@@ -2,8 +2,8 @@ package com.reference.ncbca.dao;
 
 import com.reference.ncbca.dao.mappers.CoachesMapper;
 import com.reference.ncbca.model.Coach;
-import com.reference.ncbca.model.Game;
 import com.reference.ncbca.util.DaoHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -12,7 +12,15 @@ import java.util.List;
 @Repository
 public class CoachesDao {
 
-    private static final String CONNECTION_STRING = "jdbc:sqlite:src/main/resources/databases/coaches.db";
+    @Value("${database.hostname}")
+    private String databaseHostName;
+
+    @Value("${database.username}")
+    private String userName;
+
+    @Value("${database.password}")
+    private String password;
+
     private static final String INSERT_SQL = "INSERT INTO Coaches (coach_name, start_season, end_season, active, current_team) VALUES (?, ?, ?, ?, ?)";
     private static final String GET_COACH_FROM_TEAM_NAME_SQL = "SELECT * FROM Coaches WHERE active = 1 AND current_team = ?";
 
@@ -22,9 +30,10 @@ public class CoachesDao {
         this.mapper = mapper;
     }
     public void load(List<Coach> coachList) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
             for (Coach coach : coachList) {
-                PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
                 pstmt.setString(1, coach.coachName());
                 pstmt.setInt(2, coach.startSeason());
                 if (coach.endSeason() != null) {
@@ -34,15 +43,16 @@ public class CoachesDao {
                 }
                 pstmt.setBoolean(4, coach.active());
                 pstmt.setString(5, coach.currentTeam());
-                pstmt.executeUpdate();
-                pstmt.close();
+                pstmt.addBatch();
             }
+                pstmt.executeBatch();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     public Coach getCoachFromTeam(String teamName) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(GET_COACH_FROM_TEAM_NAME_SQL);
             pstmt.setString(1, teamName);

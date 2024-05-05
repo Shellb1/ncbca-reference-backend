@@ -3,6 +3,7 @@ package com.reference.ncbca.dao;
 import com.reference.ncbca.dao.mappers.NitMapper;
 import com.reference.ncbca.model.NitGame;
 import com.reference.ncbca.util.DaoHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -15,7 +16,15 @@ import java.util.List;
 @Repository
 public class NitDao {
 
-    private static final String CONNECTION_STRING = "jdbc:sqlite:src/main/resources/databases/nit.db";
+    @Value("${database.hostname}")
+    private String databaseHostName;
+
+    @Value("${database.username}")
+    private String userName;
+
+    @Value("${database.password}")
+    private String password;
+
     private static final String INSERT_SQL = "INSERT INTO nit(game_id, season) VALUES(?,?)";
     private static final String LIST_NIT_TEAMS_SQL = "SELECT * FROM nit WHERE season = ?";
 
@@ -26,19 +35,23 @@ public class NitDao {
     }
 
     public void insert(List<NitGame> teams) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
             for (NitGame nitTeam: teams) {
-                PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
                 pstmt.setInt(1, nitTeam.gameId());
                 pstmt.setInt(2, nitTeam.season());
-                pstmt.executeUpdate();
+                pstmt.addBatch();
             }
+            pstmt.executeBatch();
+            pstmt.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     public List<NitGame> listNitGamesForSeason(Integer season) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(LIST_NIT_TEAMS_SQL);
             pstmt.setInt(1, season);
