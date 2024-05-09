@@ -31,3 +31,6 @@ replay_pid*
 
 # SSH Key
 *.pem
+
+local database
+src/main/resources/databases/
