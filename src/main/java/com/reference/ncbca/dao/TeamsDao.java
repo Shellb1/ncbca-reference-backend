@@ -33,7 +33,7 @@ public class TeamsDao {
     }
 
     public void insert(List<Team> teams) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
             for (Team team : teams) {
@@ -55,7 +55,7 @@ public class TeamsDao {
     }
 
     public Team get(Integer teamId) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(GET_BY_ID_SQL);
             pstmt.setInt(1, teamId);
@@ -71,7 +71,7 @@ public class TeamsDao {
     }
 
     public List<Team> listAllTeams() {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(LIST_ALL_TEAMS_SQL);
             ResultSet result = pstmt.executeQuery();

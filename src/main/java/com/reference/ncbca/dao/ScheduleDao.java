@@ -32,7 +32,7 @@ public class ScheduleDao {
     }
 
     public void load(List<ScheduleGame> games) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
             for (ScheduleGame game : games) {
@@ -52,7 +52,7 @@ public class ScheduleDao {
     }
 
     public List<ScheduleGame> getEntireSchedule(Integer year) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(LIST_ALL_SQL);
             pstmt.setInt(1, year);

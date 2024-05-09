@@ -35,7 +35,7 @@ public class NitDao {
     }
 
     public void insert(List<NitGame> teams) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
             for (NitGame nitTeam: teams) {
@@ -51,7 +51,7 @@ public class NitDao {
     }
 
     public List<NitGame> listNitGamesForSeason(Integer season) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(LIST_NIT_TEAMS_SQL);
             pstmt.setInt(1, season);

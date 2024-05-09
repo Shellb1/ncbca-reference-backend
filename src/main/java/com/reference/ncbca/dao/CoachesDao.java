@@ -30,7 +30,7 @@ public class CoachesDao {
         this.mapper = mapper;
     }
     public void load(List<Coach> coachList) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
             for (Coach coach : coachList) {
@@ -52,7 +52,7 @@ public class CoachesDao {
     }
 
     public Coach getCoachFromTeam(String teamName) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(GET_COACH_FROM_TEAM_NAME_SQL);
             pstmt.setString(1, teamName);

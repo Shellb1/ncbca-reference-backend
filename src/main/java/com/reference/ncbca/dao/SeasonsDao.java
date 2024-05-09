@@ -35,7 +35,7 @@ public class SeasonsDao {
         this.mapper = mapper;
     }
     public void load(List<Season> seasons) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
             for (Season season : seasons) {
@@ -58,7 +58,7 @@ public class SeasonsDao {
     }
 
     public List<Season> findSeasonsByYear(Integer year) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement preparedStatement = conn.prepareStatement(FIND_SEASONS_BY_YEAR_SQL);
             preparedStatement.setInt(1, year);
@@ -74,7 +74,7 @@ public class SeasonsDao {
     }
 
     public List<Season> findSeasonsByCoachName(String coachName) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement preparedStatement = conn.prepareStatement(FIND_SEASONS_BY_COACH_SQL);
             preparedStatement.setString(1, coachName);
@@ -87,7 +87,7 @@ public class SeasonsDao {
     }
 
     public Season getSeasonForTeamAndYear(String teamName, Integer year) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference_db?user=" + userName + "&password=" + password;
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement preparedStatement = conn.prepareStatement(GET_SEASON_BY_TEAM_AND_YEAR_SQL);
             preparedStatement.setString(1, teamName);
