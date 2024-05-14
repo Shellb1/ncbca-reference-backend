@@ -2,7 +2,6 @@ package com.reference.ncbca.dao;
 
 import com.reference.ncbca.dao.mappers.GamesMapper;
 import com.reference.ncbca.model.Game;
-import com.reference.ncbca.model.Season;
 import com.reference.ncbca.util.DaoHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Repository
 public class GamesDao {
@@ -24,7 +22,7 @@ public class GamesDao {
     @Value("${database.password}")
     private String password;
 
-    private static final String INSERT_SQL = "INSERT INTO Games (game_id, season, neutral_site, home_team_id, away_team_id, home_team_name, away_team_name, winning_team_id, winning_team_name, winning_team_score, losing_team_id, losing_team_name, losing_team_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_SQL = "INSERT INTO Games (game_id, season, neutral_site, home_team_id, away_team_id, home_team_name, away_team_name, winning_team_id, winning_team_name, winning_team_score, losing_team_id, losing_team_name, losing_team_score, winning_coach_name, losing_coach_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String GET_GAMES_FOR_TEAM_BY_YEAR_SQL = "SELECT * FROM Games WHERE (home_team_name = ? OR away_team_name = ?) AND season = ?";
     private static final String GET_LATEST_GAME_ID_FOR_SEASON = "SELECT MAX(game_id) AS largest_id FROM Games WHERE season = ?";
     private static final String GET_ALL_EXISTING_GAMES_FOR_SEASON = "SELECT * FROM Games WHERE season = ?";
@@ -36,10 +34,11 @@ public class GamesDao {
     public GamesDao(GamesMapper mapper) {
         this.mapper = mapper;
     }
+
     public List<Game> getGamesForTeamByYear(String teamName, Integer year) {
         String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection connection = DaoHelper.connect(CONNECTION_STRING);
-            PreparedStatement statement = connection.prepareStatement(GET_GAMES_FOR_TEAM_BY_YEAR_SQL)) {
+             PreparedStatement statement = connection.prepareStatement(GET_GAMES_FOR_TEAM_BY_YEAR_SQL)) {
             statement.setString(1, teamName);
             statement.setString(2, teamName);
             statement.setInt(3, year);
@@ -73,6 +72,8 @@ public class GamesDao {
                     pstmt.setInt(11, game.losingTeamId());
                     pstmt.setString(12, game.losingTeamName());
                     pstmt.setInt(13, game.losingTeamScore());
+                    pstmt.setString(14, game.winningCoachName());
+                    pstmt.setString(15, game.losingCoachName());
                     pstmt.addBatch();
                 } else {
                     System.out.println("Game with ID " + game.gameId() + " already exists in the database. Skipping insertion.");
@@ -86,8 +87,8 @@ public class GamesDao {
     }
 
     private boolean isGameExists(Integer gameId, Integer season, List<Game> existingGames) {
-        for (Game game: existingGames) {
-            if (game.gameId() == gameId && game.season() == season) {
+        for (Game game : existingGames) {
+            if (game.gameId().equals(gameId) && game.season().equals(season)) {
                 return true;
             }
         }
@@ -97,13 +98,12 @@ public class GamesDao {
     public Integer getLatestGameForSeason(Integer season) {
         String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection connection = DaoHelper.connect(CONNECTION_STRING)) {
-            PreparedStatement statement = connection.prepareStatement(GET_LATEST_GAME_ID_FOR_SEASON); {
+            PreparedStatement statement = connection.prepareStatement(GET_LATEST_GAME_ID_FOR_SEASON);
             statement.setInt(1, season);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return mapper.mapResultForLatestGameId(resultSet);
             }
-        }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
@@ -148,19 +148,16 @@ public class GamesDao {
         return null;
     }
 
-
-
     public List<Game> getAllExistingGamesForSeason(Integer season) {
         String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
-        try (Connection connection = DaoHelper.connect(CONNECTION_STRING); PreparedStatement statement = connection.prepareStatement(GET_ALL_EXISTING_GAMES_FOR_SEASON)) {
+        try (Connection connection = DaoHelper.connect(CONNECTION_STRING);
+             PreparedStatement statement = connection.prepareStatement(GET_ALL_EXISTING_GAMES_FOR_SEASON)) {
             statement.setInt(1, season);
             ResultSet resultSet = statement.executeQuery();
             return mapper.mapResult(resultSet);
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return null;
+        return Collections.emptyList();
     }
-
-
 }

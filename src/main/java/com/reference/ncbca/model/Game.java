@@ -13,6 +13,9 @@ public record Game(
         Integer winningTeamScore,
         Integer losingTeamId,
         String losingTeamName,
-        Integer losingTeamScore
+        Integer losingTeamScore,
+        String winningCoachName,
+        String losingCoachName
 ) {}
+
 

@@ -42,7 +42,6 @@ public class LoadExportHandler {
         this.postseasonHandler = postseasonHandler;
     }
 
-
     public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons, Boolean loadGames, Boolean loadSchedules, Boolean loadCoaches, Integer season, Boolean loadCt, Boolean loadNIT, Boolean loadFirstFour, Boolean loadNT) throws IOException {
         byte[] fileBytes = file.getBytes();
 
@@ -101,10 +100,12 @@ public class LoadExportHandler {
                 Integer losingTeamId = game.get("lost").get("tid").intValue();
                 String losingTeamName = determineTeamFromTid(losingTeamId, allTeams);
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
+                String winningCoachName = determineCoachFromTeam(winningTeamId, allTeams);
+                String losingCoachName = determineCoachFromTeam(losingTeamId, allTeams);
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
-                        losingTeamName, losingTeamScore);
+                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName);
                 gamesPlayed.add(gamePlayed);
             }
             gamesHandler.load(gamesPlayed, season);
@@ -149,10 +150,13 @@ public class LoadExportHandler {
                 Integer losingTeamId = game.get("lost").get("tid").intValue();
                 String losingTeamName = determineTeamFromTid(losingTeamId, teams);
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
+                String winningCoachName = determineCoachFromTeam(winningTeamId, teams);
+                String losingCoachName = determineCoachFromTeam(losingTeamId, teams);
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
-                        losingTeamName, losingTeamScore);
+                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName);
+                gamesPlayed.add(gamePlayed);
                 gamesPlayed.add(gamePlayed);
             }
             gamesHandler.load(gamesPlayed, season);
@@ -187,10 +191,12 @@ public class LoadExportHandler {
                 Integer losingTeamId = game.get("lost").get("tid").intValue();
                 String losingTeamName = determineTeamFromTid(losingTeamId, allTeams);
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
+                String winningCoachName = determineCoachFromTeam(winningTeamId, allTeams);
+                String losingCoachName = determineCoachFromTeam(losingTeamId, allTeams);
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
-                        losingTeamName, losingTeamScore);
+                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName);
                 gamesPlayed.add(gamePlayed);
                 PostseasonGame nitGame = new PostseasonGame(gameId, season, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "NIT");
                 nitGames.add(nitGame);
@@ -231,10 +237,12 @@ public class LoadExportHandler {
                 Integer losingTeamId = game.get("lost").get("tid").intValue();
                 String losingTeamName = determineTeamFromTid(losingTeamId, allTeams);
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
+                String winningCoachName = determineCoachFromTeam(winningTeamId, allTeams);
+                String losingCoachName = determineCoachFromTeam(losingTeamId, allTeams);
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
-                        losingTeamName, losingTeamScore);
+                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName);
                 gamesPlayed.add(gamePlayed);
                 PostseasonGame postseasonGame;
                 if (loadFirstFour) {
@@ -271,6 +279,15 @@ public class LoadExportHandler {
         parser.close();
     }
 
+    private String determineCoachFromTeam(Integer teamId, List<Team> allTeams) {
+        for (Team team: allTeams) {
+            if (team.teamId() == teamId) {
+                return team.coach();
+            }
+        }
+        return "";
+    }
+
     private Integer determineGamesWon(Integer teamId, Integer season) {
         return gamesHandler.determineGamesWonForTeam(teamId, season);
     }
@@ -303,5 +320,4 @@ public class LoadExportHandler {
         }
         return "";
     }
-
 }

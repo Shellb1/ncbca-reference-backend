@@ -1,6 +1,5 @@
 package com.reference.ncbca.dao.mappers;
 
-import com.reference.ncbca.model.Coach;
 import com.reference.ncbca.model.Game;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +28,10 @@ public class GamesMapper {
             Integer losingTeamId = resultSet.getInt("losing_team_id");
             String losingTeamName = resultSet.getString("losing_team_name");
             Integer losingTeamScore = resultSet.getInt("losing_team_score");
+            String winningCoachName = resultSet.getString("winning_coach_name");
+            String losingCoachName = resultSet.getString("losing_coach_name");
 
-            games.add(new Game(gameId, season, neutralSite, homeTeamId, awayTeamId, homeTeamName, awayTeamName, winningTeamId, winningTeamName, winningTeamScore, losingTeamId, losingTeamName, losingTeamScore));
+            games.add(new Game(gameId, season, neutralSite, homeTeamId, awayTeamId, homeTeamName, awayTeamName, winningTeamId, winningTeamName, winningTeamScore, losingTeamId, losingTeamName, losingTeamScore, winningCoachName, losingCoachName));
         }
 
         return games;
