@@ -23,13 +23,7 @@ public class SeasonsHandler {
 
     public List<Season> listSeasonsForYear(Integer year) {
         List<Season> seasons = seasonsDao.findSeasonsByYear(year);
-        seasons.sort(new Comparator<Season>() {
-
-            @Override
-            public int compare(Season o1, Season o2) {
-                return o2.gamesWon().compareTo(o1.gamesWon());
-            }
-        });
+        seasons.sort((o1, o2) -> o2.gamesWon().compareTo(o1.gamesWon()));
         return seasons;
     }
 

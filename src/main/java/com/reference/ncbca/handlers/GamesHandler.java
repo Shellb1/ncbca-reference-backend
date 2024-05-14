@@ -23,4 +23,12 @@ public class GamesHandler {
         return gamesDao.getLatestGameForSeason(season);
     }
 
+    public Integer determineGamesWonForTeam(Integer teamId, Integer season) {
+        return gamesDao.getGamesWonForTeamInSeason(teamId, season);
+    }
+
+    public Integer determineGamesLostForTeam(Integer teamId, Integer season) {
+        return gamesDao.getGamesLostForTeamInSeason(teamId, season);
+    }
+
 }

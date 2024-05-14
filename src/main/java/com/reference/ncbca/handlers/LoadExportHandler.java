@@ -17,7 +17,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class LoadExportHandler {
@@ -28,21 +27,19 @@ public class LoadExportHandler {
     private final ScheduleHandler scheduleHandler;
     private final CoachesHandler coachesHandler;
     private final GamesHandler gamesHandler;
-    private final NitHandler nitHandler;
-    private final NtHandler ntHandler;
+    private final PostseasonHandler postseasonHandler;
 
     @Value("classpath:databases/coaches.csv")
     private Resource coachesCsv;
 
-    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, NitHandler nitHandler, NtHandler ntHandler) {
+    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, PostseasonHandler postseasonHandler) {
         this.conferencesMap = conferencesMap;
         this.teamsHandler = teamsHandler;
         this.seasonsHandler = seasonsHandler;
         this.scheduleHandler = scheduleHandler;
         this.coachesHandler = coachesHandler;
         this.gamesHandler = gamesHandler;
-        this.nitHandler = nitHandler;
-        this.ntHandler = ntHandler;
+        this.postseasonHandler = postseasonHandler;
     }
 
 
@@ -83,32 +80,6 @@ public class LoadExportHandler {
             teamsHandler.loadTeams(teams);
         }
 
-        if (loadSeasons) {
-            List<Season> seasons = new ArrayList<>();
-            JsonNode teamsArray = export.get("teams");
-            for (JsonNode jsonTeam : teamsArray) {
-                String teamName = jsonTeam.get("region").textValue() + " " + jsonTeam.get("name").textValue();
-                Integer teamId = jsonTeam.get("tid").intValue();
-                JsonNode seasonsArray = jsonTeam.get("seasons");
-                JsonNode seasonToEnter = null;
-                for (JsonNode seasonJson: seasonsArray) {
-                    if (seasonJson.get("season").intValue() == season) {
-                        seasonToEnter = seasonJson;
-                        break;
-                    }
-                }
-                Integer gamesWon = seasonToEnter.get("won").intValue();
-                Integer gamesLost = seasonToEnter.get("lost").intValue();
-                Coach coachOfTeam = coachesHandler.getCoachOfTeam(teamName);
-                String coachName = null;
-                if (coachOfTeam != null) {
-                    coachName = coachOfTeam.coachName();
-                }
-                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, season, coachName));
-            }
-            seasonsHandler.load(seasons);
-        }
-
         // only used for regular season games, use CT/NIT/First Four/NT options for postseason play
         if (loadGames) {
             // assumes teams have been loaded
@@ -136,8 +107,7 @@ public class LoadExportHandler {
                         losingTeamName, losingTeamScore);
                 gamesPlayed.add(gamePlayed);
             }
-           gamesHandler.load(gamesPlayed, season);
-
+            gamesHandler.load(gamesPlayed, season);
         }
 
         if (loadSchedules) {
@@ -191,7 +161,7 @@ public class LoadExportHandler {
         if (loadNIT) {
             JsonNode games = export.get("games");
             List<Game> gamesPlayed = new ArrayList<>();
-            List<NitGame> nitGames = new ArrayList<>();
+            List<PostseasonGame> nitGames = new ArrayList<>();
             // assumes all teams have been loaded
             List<Team> allTeams = teamsHandler.listAllTeams();
             Integer currentGameId = gamesHandler.getLatestGameId(season);
@@ -222,19 +192,19 @@ public class LoadExportHandler {
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
                         losingTeamName, losingTeamScore);
                 gamesPlayed.add(gamePlayed);
-                NitGame nitGame = new NitGame(gameId, season);
+                PostseasonGame nitGame = new PostseasonGame(gameId, season, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "NIT");
                 nitGames.add(nitGame);
             }
             gamesHandler.load(gamesPlayed, season);
 
             // keep track of NIT games for each season
-            nitHandler.load(nitGames);
+            postseasonHandler.load(nitGames);
         }
 
         if (loadFirstFour || loadNT) {
             JsonNode games = export.get("games");
             List<Game> gamesPlayed = new ArrayList<>();
-            List<NtGame> ntGames = new ArrayList<>();
+            List<PostseasonGame> postseasonGames = new ArrayList<>();
             // assumes all teams have been loaded
             List<Team> allTeams = teamsHandler.listAllTeams();
             Integer currentGameId = gamesHandler.getLatestGameId(season);
@@ -244,7 +214,7 @@ public class LoadExportHandler {
                     continue;
                 }
                 currentGameId++;
-                // loading first four means game ids are after CT ids (differ from export because we split postseasons tournaments)
+                // loading first sixteen means game ids are after CT ids (differ from export because we split postseasons tournaments)
                 Integer gameId = currentGameId;
 
                 // loading NT means means neutral site game, home/away is irrelevant
@@ -266,14 +236,47 @@ public class LoadExportHandler {
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
                         losingTeamName, losingTeamScore);
                 gamesPlayed.add(gamePlayed);
-                NtGame ntGame = new NtGame(gameId, season);
-                ntGames.add(ntGame);
+                PostseasonGame postseasonGame;
+                if (loadFirstFour) {
+                    postseasonGame = new PostseasonGame(gameId, seasonYear, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "FIRST_SIXTEEN");
+                } else {
+                    postseasonGame = new PostseasonGame(gameId, seasonYear, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "MAIN_FIELD");
+
+                }
+                postseasonGames.add(postseasonGame);
             }
             gamesHandler.load(gamesPlayed, season);
             // keep track of NT games for each season
-            ntHandler.load(ntGames);
+            postseasonHandler.load(postseasonGames);
         }
+
+        if (loadSeasons) {
+            List<Season> seasons = new ArrayList<>();
+            JsonNode teamsArray = export.get("teams");
+            for (JsonNode jsonTeam : teamsArray) {
+                String teamName = jsonTeam.get("region").textValue() + " " + jsonTeam.get("name").textValue();
+                Integer teamId = jsonTeam.get("tid").intValue();
+                Integer gamesWon = determineGamesWon(teamId, season);
+                Integer gamesLost = determineGamesLost(teamId, season);
+                Coach coachOfTeam = coachesHandler.getCoachOfTeam(teamName);
+                String coachName = null;
+                if (coachOfTeam != null) {
+                    coachName = coachOfTeam.coachName();
+                }
+                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, season, coachName));
+            }
+            seasonsHandler.load(seasons);
+        }
+
         parser.close();
+    }
+
+    private Integer determineGamesWon(Integer teamId, Integer season) {
+        return gamesHandler.determineGamesWonForTeam(teamId, season);
+    }
+
+    private Integer determineGamesLost(Integer teamId, Integer season) {
+        return gamesHandler.determineGamesLostForTeam(teamId, season);
     }
 
     private List<Coach> getCoachList() throws IOException {

@@ -28,6 +28,9 @@ public class GamesDao {
     private static final String GET_GAMES_FOR_TEAM_BY_YEAR_SQL = "SELECT * FROM Games WHERE (home_team_name = ? OR away_team_name = ?) AND season = ?";
     private static final String GET_LATEST_GAME_ID_FOR_SEASON = "SELECT MAX(game_id) AS largest_id FROM Games WHERE season = ?";
     private static final String GET_ALL_EXISTING_GAMES_FOR_SEASON = "SELECT * FROM Games WHERE season = ?";
+    private static final String DETERMINE_GAMES_WON_FOR_TEAM_SQL = "SELECT COUNT(*) AS games_won FROM Games WHERE season = ? AND winning_team_id = ?";
+    private static final String DETERMINE_GAMES_LOST_FOR_TEAM_SQL = "SELECT COUNT(*) AS games_lost FROM Games WHERE season = ? AND losing_team_id = ?";
+
     private final GamesMapper mapper;
 
     public GamesDao(GamesMapper mapper) {
@@ -106,6 +109,46 @@ public class GamesDao {
         }
         return null;
     }
+
+    public Integer getGamesWonForTeamInSeason(Integer teamId, Integer season) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;;
+
+        try (Connection connection = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement statement = connection.prepareStatement(DETERMINE_GAMES_WON_FOR_TEAM_SQL);
+            statement.setInt(1, season);
+            statement.setInt(2, teamId);
+
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("games_won");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public Integer getGamesLostForTeamInSeason(Integer teamId, Integer season) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+
+        try (Connection connection = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement statement = connection.prepareStatement(DETERMINE_GAMES_LOST_FOR_TEAM_SQL);
+            statement.setInt(1, season);
+            statement.setInt(2, teamId);
+
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("games_lost");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
+
 
     public List<Game> getAllExistingGamesForSeason(Integer season) {
         String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
