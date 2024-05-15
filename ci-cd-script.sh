@@ -14,10 +14,9 @@ mvn clean install
 echo "Copying JAR file to EC2 instance..."
 scp -i ssh-key.pem target/ncbca-reference-backend-1.0.0-SNAPSHOT.jar ubuntu@$EC2_HOST:~/ncbca-reference-backend/
 
+# Commands to run on EC2 server
 ssh -i $PRIVATE_KEY ubuntu@$EC2_HOST << 'EOF'
     echo "Running commands on EC2 instance..."
-    # Add your commands here
-
     echo "Stopping systemctl service"
     sudo systemctl stop ncbca-reference-backend.service
 
@@ -28,6 +27,8 @@ ssh -i $PRIVATE_KEY ubuntu@$EC2_HOST << 'EOF'
     # starting ncbca-reference-backend.service
     echo "Starting ncbca-reference-backend.service"
     sudo systemctl start ncbca-reference-backend.service
+
+    # sanity check to see status started successfully
     sudo systemctl status ncbca-reference-backend.service
 EOF
 exit
