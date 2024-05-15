@@ -29,8 +29,8 @@
 hs_err_pid*
 replay_pid*
 
-# SSH Key
+# Credentials
 *.pem
-
+secrets.env
 local database
 src/main/resources/databases/
