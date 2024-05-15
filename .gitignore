@@ -31,7 +31,7 @@ replay_pid*
 
 # Credentials
 *.pem
-*.env
+secrets.env
 
 # local database
 src/main/resources/databases/
