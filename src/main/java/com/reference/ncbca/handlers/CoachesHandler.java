@@ -7,9 +7,7 @@ import com.reference.ncbca.model.Game;
 import com.reference.ncbca.model.Season;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class CoachesHandler {
@@ -41,7 +39,7 @@ public class CoachesHandler {
         List<Game> gamesCoachedIn = gamesHandler.getAllTimeGamesPlayedByCoach(coachName);
         Map<String, Integer> winsMap = new HashMap<>();
         Map<String, Integer> lossesMap = new HashMap<>();
-        Map<String, String> record = new HashMap<>();
+        Map<String, String> record = new LinkedHashMap<>(); // Using LinkedHashMap to maintain insertion order
 
         for (Game game : gamesCoachedIn) {
             String opponentCoachName;
@@ -54,14 +52,17 @@ public class CoachesHandler {
             }
         }
 
-        winsMap.remove(null);
-        lossesMap.remove(null);
-        for (String opponentCoachName : winsMap.keySet()) {
+        winsMap.entrySet().removeIf(entry -> entry.getKey() == null);
+        lossesMap.entrySet().removeIf(entry -> entry.getKey() == null);
+
+        List<String> allOpponents = new ArrayList<>(new HashSet<>(winsMap.keySet()));
+        allOpponents.addAll(new HashSet<>(lossesMap.keySet()));
+
+        allOpponents.forEach(opponentCoachName -> {
             int wins = winsMap.getOrDefault(opponentCoachName, 0);
             int losses = lossesMap.getOrDefault(opponentCoachName, 0);
             record.put(opponentCoachName, wins + "-" + losses);
-        }
-        record.remove(null);
+        });
 
         return record;
     }
