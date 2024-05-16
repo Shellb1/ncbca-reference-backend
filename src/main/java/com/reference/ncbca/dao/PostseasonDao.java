@@ -48,8 +48,9 @@ public class PostseasonDao {
                 pstmt.setString(7, postseasonGame.winningTeamName());
                 pstmt.setString(8, postseasonGame.losingTeamName());
                 pstmt.setString(9, postseasonGame.gameType());
-                pstmt.executeUpdate();
+                pstmt.addBatch();
             }
+            pstmt.executeBatch();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }

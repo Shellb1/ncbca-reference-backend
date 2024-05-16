@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class GamesDao {
@@ -24,10 +26,11 @@ public class GamesDao {
 
     private static final String INSERT_SQL = "INSERT INTO Games (game_id, season, neutral_site, home_team_id, away_team_id, home_team_name, away_team_name, winning_team_id, winning_team_name, winning_team_score, losing_team_id, losing_team_name, losing_team_score, winning_coach_name, losing_coach_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String GET_GAMES_FOR_TEAM_BY_YEAR_SQL = "SELECT * FROM Games WHERE (home_team_name = ? OR away_team_name = ?) AND season = ?";
-    private static final String GET_LATEST_GAME_ID_FOR_SEASON = "SELECT MAX(game_id) AS largest_id FROM Games WHERE season = ?";
-    private static final String GET_ALL_EXISTING_GAMES_FOR_SEASON = "SELECT * FROM Games WHERE season = ?";
+    private static final String GET_LATEST_GAME_ID_FOR_SEASON_SQL = "SELECT MAX(game_id) AS largest_id FROM Games WHERE season = ?";
+    private static final String GET_ALL_EXISTING_GAMES_FOR_SEASON_SQL = "SELECT * FROM Games WHERE season = ?";
     private static final String DETERMINE_GAMES_WON_FOR_TEAM_SQL = "SELECT COUNT(*) AS games_won FROM Games WHERE season = ? AND winning_team_id = ?";
     private static final String DETERMINE_GAMES_LOST_FOR_TEAM_SQL = "SELECT COUNT(*) AS games_lost FROM Games WHERE season = ? AND losing_team_id = ?";
+    private static final String GET_ALL_TIME_GAMES_PLAYED_IN_SQL = "SELECT * FROM Games WHERE winning_coach_name = ? OR losing_coach_name = ?";
 
     private final GamesMapper mapper;
 
@@ -98,7 +101,7 @@ public class GamesDao {
     public Integer getLatestGameForSeason(Integer season) {
         String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection connection = DaoHelper.connect(CONNECTION_STRING)) {
-            PreparedStatement statement = connection.prepareStatement(GET_LATEST_GAME_ID_FOR_SEASON);
+            PreparedStatement statement = connection.prepareStatement(GET_LATEST_GAME_ID_FOR_SEASON_SQL);
             statement.setInt(1, season);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -151,7 +154,7 @@ public class GamesDao {
     public List<Game> getAllExistingGamesForSeason(Integer season) {
         String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection connection = DaoHelper.connect(CONNECTION_STRING);
-             PreparedStatement statement = connection.prepareStatement(GET_ALL_EXISTING_GAMES_FOR_SEASON)) {
+             PreparedStatement statement = connection.prepareStatement(GET_ALL_EXISTING_GAMES_FOR_SEASON_SQL)) {
             statement.setInt(1, season);
             ResultSet resultSet = statement.executeQuery();
             return mapper.mapResult(resultSet);
@@ -160,4 +163,21 @@ public class GamesDao {
         }
         return Collections.emptyList();
     }
+
+    public List<Game> getAllGamesCoachParticipatedIn(String coachName) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+        try (Connection connection = DaoHelper.connect(CONNECTION_STRING);
+             PreparedStatement statement = connection.prepareStatement(GET_ALL_TIME_GAMES_PLAYED_IN_SQL)) {
+            statement.setString(1, coachName);
+            statement.setString(2, coachName);
+            ResultSet resultSet = statement.executeQuery();
+            return mapper.mapResult(resultSet);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+
+
 }

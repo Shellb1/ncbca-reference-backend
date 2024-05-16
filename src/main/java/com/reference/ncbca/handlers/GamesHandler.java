@@ -23,6 +23,11 @@ public class GamesHandler {
         return gamesDao.getLatestGameForSeason(season);
     }
 
+    public List<Game> getAllTimeGamesPlayedByCoach(String coachName) {
+        return gamesDao.getAllGamesCoachParticipatedIn(coachName);
+    }
+
+
     public Integer determineGamesWonForTeam(Integer teamId, Integer season) {
         return gamesDao.getGamesWonForTeamInSeason(teamId, season);
     }

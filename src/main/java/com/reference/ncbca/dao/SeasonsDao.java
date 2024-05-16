@@ -63,9 +63,7 @@ public class SeasonsDao {
             PreparedStatement preparedStatement = conn.prepareStatement(FIND_SEASONS_BY_YEAR_SQL);
             preparedStatement.setInt(1, year);
             ResultSet results = preparedStatement.executeQuery();
-            if (results.next()) {
-                return mapper.mapResult(results);
-            }
+            return mapper.mapResult(results);
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
