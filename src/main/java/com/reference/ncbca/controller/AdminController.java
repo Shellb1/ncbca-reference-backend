@@ -2,6 +2,8 @@ package com.reference.ncbca.controller;
 
 
 import com.reference.ncbca.handlers.LoadExportHandler;
+import com.reference.ncbca.handlers.LoadNBLHandler;
+import com.reference.ncbca.handlers.NBLHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,9 +15,12 @@ import java.io.IOException;
 public class AdminController {
 
     private final LoadExportHandler loadExportHandler;
+    private final LoadNBLHandler loadNBLHandler;
 
-    public AdminController(LoadExportHandler loadExportHandler) {
+    public AdminController(LoadExportHandler loadExportHandler, LoadNBLHandler loadNBLHandler) {
         this.loadExportHandler = loadExportHandler;
+        this.loadNBLHandler = loadNBLHandler;
+
     }
 
     @PostMapping("/load")
@@ -31,5 +36,12 @@ public class AdminController {
                            @RequestParam("loadFirstFour") Boolean loadFirstFour,
                            @RequestParam("loadNT") Boolean loadNT) throws IOException {
         loadExportHandler.loadExport(export, loadTeams, loadSeasons, loadGames, loadSchedules, loadCoaches, season, loadCT, loadNIT, loadFirstFour, loadNT);
+    }
+
+    @PostMapping("/loadNBL")
+    public void loadExport(@RequestParam("export") MultipartFile export,
+                           @RequestParam("season") Integer season,
+                           @RequestParam("loadDraftPicks") Boolean loadDraftPicks) throws IOException {
+        loadNBLHandler.loadNblExport(export, season, loadDraftPicks);
     }
 }
