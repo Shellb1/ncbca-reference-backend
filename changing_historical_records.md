@@ -22,18 +22,24 @@ OR losing_coach_name = 'Western Kentucky Hilltoppers'
 # Update historic records by changing coaches:
 To change historic records for user
 
-START TRANSACTION;
+UPDATE Games
+SET winning_coach_name = null
+WHERE winning_team_name = 'Howard Bison'
+AND season = 2078;
 
 UPDATE Games
-SET winning_coach_name = ?
-WHERE winning_team_name = ?;
-
-UPDATE Games
-SET losing_coach_name = ?
-WHERE losing_team_name = ?;
+SET losing_coach_name = null
+WHERE losing_team_name = 'Howard Bison'
+AND season = 2078;
 
 UPDATE Seasons
-SET coach_name = ?
-WHERE team_name = ?;
+SET coach_name = null
+WHERE team_name = 'Howard Bison'
+AND season = 2078;
+
+UPDATE drafted_players
+SET coach_name = null
+WHERE college_team_name = 'Howard'
+AND season = 2078;
 
 COMMIT;

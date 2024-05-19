@@ -30,6 +30,10 @@ public class CoachesHandler {
         return coachesDao.getCoachFromTeam(teamName);
     }
 
+    public List<Coach> getAllCoaches() {
+        return coachesDao.getAllCoaches();
+    }
+
     public CoachSummary getCoachSummary(String coachName) {
         List<Season> seasonsCoached = seasonsHandler.listSeasonsForCoach(coachName);
         return new CoachSummary(seasonsCoached, coachName);

@@ -1,11 +1,13 @@
 package com.reference.ncbca.controller;
 
 import com.reference.ncbca.handlers.CoachesHandler;
+import com.reference.ncbca.model.Coach;
 import com.reference.ncbca.model.CoachSummary;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,6 +27,11 @@ public class CoachesController {
     @GetMapping("allTimeRecordVersusOtherCoaches")
     public Map<String, String> getAllTimeCoachRecordVsOtherCoaches(@RequestParam("coachName") String coachName) {
         return coachesHandler.getRecordVersusOtherCoaches(coachName);
+    }
+
+    @GetMapping("/allCoaches")
+    public List<Coach> getAllCoaches() {
+        return coachesHandler.getAllCoaches();
     }
 
 }

@@ -23,6 +23,7 @@ public class CoachesDao {
 
     private static final String INSERT_SQL = "INSERT INTO Coaches (coach_name, start_season, end_season, active, current_team) VALUES (?, ?, ?, ?, ?)";
     private static final String GET_COACH_FROM_TEAM_NAME_SQL = "SELECT * FROM Coaches WHERE active = 1 AND current_team = ?";
+    private static final String GET_ALL_COACHES_SQL = "SELECT * FROM Coaches";
 
     private final CoachesMapper mapper;
 
@@ -45,7 +46,8 @@ public class CoachesDao {
                 pstmt.setString(5, coach.currentTeam());
                 pstmt.addBatch();
             }
-                pstmt.executeBatch();
+            pstmt.executeBatch();
+            pstmt.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -62,6 +64,19 @@ public class CoachesDao {
             if (coaches.size() == 1) {
                 return coaches.getFirst();
             }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
+    public List<Coach> getAllCoaches() {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+        try (Connection conn = DaoHelper.connect(CONNECTION_STRING); PreparedStatement pstmt = conn.prepareStatement(GET_ALL_COACHES_SQL);) {
+            ResultSet results = pstmt.executeQuery();
+            List<Coach> coaches = mapper.mapResult(results);
+            pstmt.close();
+            return coaches;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
