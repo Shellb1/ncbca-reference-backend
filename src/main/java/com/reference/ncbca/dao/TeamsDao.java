@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -22,8 +23,9 @@ public class TeamsDao {
     private String password;
 
     private static final String INSERT_SQL = "INSERT INTO teams(team_id,team_name,conference_id,conference_name,coach) VALUES(?,?,?,?,?)";
-    private static final String GET_BY_ID_SQL = "SELECT * FROM teams WHERE team_id = ?";
+    private static final String LIST_ALL_ACTIVE_TEAMS_SQL = "SELECT * FROM teams WHERE active = true";
     private static final String LIST_ALL_TEAMS_SQL = "SELECT * FROM teams";
+
 
 
     private final TeamResultMapper mapper;
@@ -54,20 +56,16 @@ public class TeamsDao {
         }
     }
 
-    public Team get(Integer teamId) {
+    public List<Team> listAllActiveTeams() {
         String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
-            PreparedStatement pstmt = conn.prepareStatement(GET_BY_ID_SQL);
-            pstmt.setInt(1, teamId);
+            PreparedStatement pstmt = conn.prepareStatement(LIST_ALL_ACTIVE_TEAMS_SQL);
             ResultSet result = pstmt.executeQuery();
-            List<Team> results = mapper.mapResult(result);
-            if (!results.isEmpty()) {
-                return results.getFirst();
-            }
+            return mapper.mapResult(result);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public List<Team> listAllTeams() {
@@ -79,6 +77,6 @@ public class TeamsDao {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return null;
+        return Collections.emptyList();
     }
 }

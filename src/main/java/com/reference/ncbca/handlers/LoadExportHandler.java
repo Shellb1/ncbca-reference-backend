@@ -73,7 +73,7 @@ public class LoadExportHandler {
                 if (coach != null) {
                     coachName = coach.coachName();
                 }
-                Team team = new Team(teamId, teamName, conferenceId, conferenceName, coachName);
+                Team team = new Team(teamId, teamName, conferenceId, conferenceName, coachName, true);
                 teams.add(team);
             }
             teamsHandler.loadTeams(teams);
@@ -82,7 +82,7 @@ public class LoadExportHandler {
         // only used for regular season games, use CT/NIT/First Four/NT options for postseason play
         if (loadGames) {
             // assumes teams have been loaded
-            List<Team> allTeams = teamsHandler.listAllTeams();
+            List<Team> allTeams = teamsHandler.listAllActiveTeams();
             List<Game> gamesPlayed = new ArrayList<>();
             JsonNode gamesArray = export.get("games");
             List<ScheduleGame> scheduledGames = scheduleHandler.getEntireSchedule(season);
@@ -113,7 +113,7 @@ public class LoadExportHandler {
 
         if (loadSchedules) {
             // assuming active teams have already been loaded
-            List<Team> teams = teamsHandler.listAllTeams();
+            List<Team> teams = teamsHandler.listAllActiveTeams();
             List<ScheduleGame> games = new ArrayList<>();
             JsonNode gamesArray = export.get("schedule");
             for (JsonNode game : gamesArray) {
@@ -130,7 +130,7 @@ public class LoadExportHandler {
 
         if (loadCt) {
             // assuming active teams have already been loaded
-            List<Team> teams = teamsHandler.listAllTeams();
+            List<Team> teams = teamsHandler.listAllActiveTeams();
             JsonNode games = export.get("games");
             List<Game> gamesPlayed = new ArrayList<>();
             for (JsonNode game: games) {
@@ -167,7 +167,7 @@ public class LoadExportHandler {
             List<Game> gamesPlayed = new ArrayList<>();
             List<PostseasonGame> nitGames = new ArrayList<>();
             // assumes all teams have been loaded
-            List<Team> allTeams = teamsHandler.listAllTeams();
+            List<Team> allTeams = teamsHandler.listAllActiveTeams();
             Integer currentGameId = gamesHandler.getLatestGameId(season);
             for (JsonNode game: games) {
                 if (game.get("gid").intValue() <= currentGameId) {
@@ -212,7 +212,7 @@ public class LoadExportHandler {
             List<Game> gamesPlayed = new ArrayList<>();
             List<PostseasonGame> postseasonGames = new ArrayList<>();
             // assumes all teams have been loaded
-            List<Team> allTeams = teamsHandler.listAllTeams();
+            List<Team> allTeams = teamsHandler.listAllActiveTeams();
             Integer currentGameId = gamesHandler.getLatestGameId(season);
             for (JsonNode game: games) {
                 // not great for if we expand but will deal with when we get there!
@@ -281,7 +281,7 @@ public class LoadExportHandler {
 
     private String determineCoachFromTeam(Integer teamId, List<Team> allTeams) {
         for (Team team: allTeams) {
-            if (team.teamId() == teamId) {
+            if (Objects.equals(team.teamId(), teamId)) {
                 return team.coach();
             }
         }

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class TeamsController {
 
@@ -15,16 +17,16 @@ public class TeamsController {
     public TeamsController(TeamsHandler teamsHandler) {
         this.teamsHandler = teamsHandler;
     }
-    @GetMapping("/getTeam")
-    public Team getTeam(@RequestParam("tid") Integer id) {
-        return teamsHandler.getTeam(id);
-    }
 
     @GetMapping("/teamSummary")
     public TeamSummary getTeamSummary(@RequestParam("teamName") String teamName,
                                       @RequestParam("year") Integer year) {
         return teamsHandler.buildTeamSummary(teamName, year);
+    }
 
+    @GetMapping("/allTeams")
+    public List<Team> listAllTeams() {
+        return teamsHandler.listAllTeams();
     }
 
 }

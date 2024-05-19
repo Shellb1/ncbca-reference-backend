@@ -20,7 +20,8 @@ public class TeamResultMapper {
             Integer conferenceId = resultSet.getInt("conference_id");
             String conferenceName = resultSet.getString("conference_name");
             String coach = resultSet.getString("coach");
-            resultList.add(new Team(teamId, teamName, conferenceId, conferenceName, coach));
+            Boolean active = resultSet.getBoolean("active");
+            resultList.add(new Team(teamId, teamName, conferenceId, conferenceName, coach, active));
         }
 
         return resultList;

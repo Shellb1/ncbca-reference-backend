@@ -60,38 +60,5 @@ CREATE TABLE Schedule (
     PRIMARY KEY(game_id, season)
 );
 
-// Simple table to keep track of which teams are in the NIT
-
-CREATE TABLE nit (
-    game_id INT,
-    season INT,
-    PRIMARY KEY(game_id, season)
-);
-
-// both of these belong in nt database
-
-CREATE TABLE nt_games (
-    game_id INT,
-    season INT,
-    PRIMARY KEY(game_id, season)
-);
-
-CREATE TABLE nt_teams (
-    team_id INT,
-    season INT,
-    seed INT,
-    champion BOOLEAN,
-    PRIMARY KEY(team_id, season)
-);
-
-CREATE TABLE inactive_teams (
-    team_id INT,
-    team_name VARCHAR(100),
-    conference_id INT,
-    conference_name VARCHAR(100),
-    last_active_year INT,
-    PRIMARY KEY(team_id, team_name)
-);
-
 
 

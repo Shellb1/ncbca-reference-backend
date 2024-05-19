@@ -23,12 +23,12 @@ public class TeamsHandler {
         this.seasonsHandler = seasonsHandler;
     }
 
-    public Team getTeam(Integer id) {
-        return teamsDao.get(id);
-    }
-
     public void loadTeams(List<Team> teams) {
         teamsDao.insert(teams);
+    }
+
+    public List<Team> listAllActiveTeams() {
+        return teamsDao.listAllActiveTeams();
     }
 
     public List<Team> listAllTeams() {

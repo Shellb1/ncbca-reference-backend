@@ -36,7 +36,7 @@ public class LoadNBLHandler {
         }
 
         List<DraftPick> draftPickList = new ArrayList<>();
-        List<Team> allTeams = teamsHandler.listAllTeams();
+        List<Team> allTeams = teamsHandler.listAllActiveTeams();
         String json = new String(fileBytes, StandardCharsets.UTF_8);
         ObjectMapper mapper = new ObjectMapper();
         JsonFactory factory = new JsonFactory();
