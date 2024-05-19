@@ -2,7 +2,7 @@ package com.reference.ncbca.controller;
 
 import com.reference.ncbca.handlers.TeamsHandler;
 import com.reference.ncbca.model.Team;
-import com.reference.ncbca.model.TeamSummary;
+import com.reference.ncbca.model.TeamSeasonSummary;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,9 +18,9 @@ public class TeamsController {
         this.teamsHandler = teamsHandler;
     }
 
-    @GetMapping("/teamSummary")
-    public TeamSummary getTeamSummary(@RequestParam("teamName") String teamName,
-                                      @RequestParam("year") Integer year) {
+    @GetMapping("/teamSeasonSummary")
+    public TeamSeasonSummary getTeamSeasonSummary(@RequestParam("teamName") String teamName,
+                                            @RequestParam("year") Integer year) {
         return teamsHandler.buildTeamSummary(teamName, year);
     }
 

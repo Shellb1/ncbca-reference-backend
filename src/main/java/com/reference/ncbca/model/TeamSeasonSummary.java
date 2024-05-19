@@ -2,7 +2,7 @@ package com.reference.ncbca.model;
 
 import java.util.List;
 
-public record TeamSummary(
+public record TeamSeasonSummary(
         int teamId,
         String teamName,
         int gamesWon,

@@ -5,7 +5,7 @@ import com.reference.ncbca.dao.TeamsDao;
 import com.reference.ncbca.model.Game;
 import com.reference.ncbca.model.Season;
 import com.reference.ncbca.model.Team;
-import com.reference.ncbca.model.TeamSummary;
+import com.reference.ncbca.model.TeamSeasonSummary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,9 +35,9 @@ public class TeamsHandler {
         return teamsDao.listAllTeams();
     }
 
-    public TeamSummary buildTeamSummary(String teamName, Integer year) {
+    public TeamSeasonSummary buildTeamSummary(String teamName, Integer year) {
         List<Game> games = gamesDao.getGamesForTeamByYear(teamName, year);
         Season teamSeason = seasonsHandler.getSeasonForTeamAndYear(teamName, year);
-        return new TeamSummary(teamSeason.teamId(), teamSeason.teamName(), teamSeason.gamesWon(), teamSeason.gamesLost(), teamSeason.seasonYear(), teamSeason.coach(), games);
+        return new TeamSeasonSummary(teamSeason.teamId(), teamSeason.teamName(), teamSeason.gamesWon(), teamSeason.gamesLost(), teamSeason.seasonYear(), teamSeason.coach(), games);
     }
 }
