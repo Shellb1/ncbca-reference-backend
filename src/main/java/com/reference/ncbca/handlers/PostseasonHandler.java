@@ -26,5 +26,9 @@ public class PostseasonHandler {
         return games;
     }
 
+    public List<PostseasonGame> getPostseasonGamesForTeam(String teamName) {
+        return postseasonDao.getPostseasonGamesForTeam(teamName);
+    }
+
 
 }

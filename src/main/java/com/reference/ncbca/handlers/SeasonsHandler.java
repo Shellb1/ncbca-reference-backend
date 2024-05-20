@@ -28,7 +28,13 @@ public class SeasonsHandler {
     }
 
     public List<Season> listSeasonsForCoach(String coach) {
-        return seasonsDao.findSeasonsByCoachName(coach);
+        List<Season> seasons = seasonsDao.findSeasonsByCoachName(coach);
+        seasons.sort(Comparator.comparing(Season::seasonYear));
+        return seasons;
+    }
+
+    public List<Season> listSeasonsForTeam(String teamName) {
+        return seasonsDao.findSeasonsByTeamName(teamName);
     }
 
     public Season getSeasonForTeamAndYear(String teamName, Integer year) {

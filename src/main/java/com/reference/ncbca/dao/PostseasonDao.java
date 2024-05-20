@@ -27,6 +27,7 @@ public class PostseasonDao {
 
     private static final String INSERT_SQL = "INSERT INTO postseason_games(game_id, season, winning_team_id, losing_team_id, winning_team_score, losing_team_score, winning_team_name, losing_team_name, game_type) VALUES(?,?,?,?,?,?,?,?,?)";
     private static final String LIST_POSTSEASON_GAMES_SQL = "SELECT * FROM postseason_games WHERE season = ?";
+    private static final String LIST_POSTSEASON_GAMES_FOR_TEAM_SQL = "SELECT * FROM postseason_games WHERE winning_team_name = ? OR losing_team_name = ?";
 
     private final PostseasonMapper postseasonMapper;
 
@@ -61,6 +62,21 @@ public class PostseasonDao {
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(LIST_POSTSEASON_GAMES_SQL);
             pstmt.setInt(1, season);
+            ResultSet results = pstmt.executeQuery();
+            return postseasonMapper.mapPostseasonGameResults(results);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+
+    public List<PostseasonGame> getPostseasonGamesForTeam(String teamName) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+        try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement pstmt = conn.prepareStatement(LIST_POSTSEASON_GAMES_FOR_TEAM_SQL);
+            pstmt.setString(1, teamName);
+            pstmt.setString(2, teamName);
             ResultSet results = pstmt.executeQuery();
             return postseasonMapper.mapPostseasonGameResults(results);
         } catch (SQLException e) {

@@ -3,8 +3,6 @@ package com.reference.ncbca.dao;
 import com.reference.ncbca.dao.mappers.SeasonsMapper;
 import com.reference.ncbca.model.Season;
 import com.reference.ncbca.util.DaoHelper;
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +25,7 @@ public class SeasonsDao {
     private static final String INSERT_SQL = "INSERT INTO Seasons (team_id, team_name, coach_name, games_won, games_lost, season) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE team_name = VALUES(team_name), coach_name = VALUES(coach_name), games_won = VALUES(games_won), games_lost = VALUES(games_lost), season = VALUES(season);";
     private static final String FIND_SEASONS_BY_YEAR_SQL = "SELECT * FROM Seasons WHERE season = ?";
     private static final String FIND_SEASONS_BY_COACH_SQL = "SELECT * FROM Seasons WHERE coach_name = ?";
+    private static final String FIND_SEASONS_BY_TEAM_SQL = "SELECT * FROM Seasons WHERE team_name = ?";
     private static final String GET_SEASON_BY_TEAM_AND_YEAR_SQL = "SELECT * FROM Seasons WHERE team_name = ? AND season = ?";
 
     private final SeasonsMapper mapper;
@@ -76,6 +75,19 @@ public class SeasonsDao {
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement preparedStatement = conn.prepareStatement(FIND_SEASONS_BY_COACH_SQL);
             preparedStatement.setString(1, coachName);
+            ResultSet results = preparedStatement.executeQuery();
+            return mapper.mapResult(results);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    public List<Season> findSeasonsByTeamName(String teamName) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+        try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement preparedStatement = conn.prepareStatement(FIND_SEASONS_BY_TEAM_SQL);
+            preparedStatement.setString(1, teamName);
             ResultSet results = preparedStatement.executeQuery();
             return mapper.mapResult(results);
         } catch (SQLException e) {

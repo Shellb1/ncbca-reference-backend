@@ -25,6 +25,7 @@ public class TeamsDao {
     private static final String INSERT_SQL = "INSERT INTO teams(team_id,team_name,conference_id,conference_name,coach) VALUES(?,?,?,?,?)";
     private static final String LIST_ALL_ACTIVE_TEAMS_SQL = "SELECT * FROM teams WHERE active = true";
     private static final String LIST_ALL_TEAMS_SQL = "SELECT * FROM teams";
+    private static final String GET_TEAM_SQL = "SELECT * FROM teams WHERE team_name = ?";
 
 
 
@@ -78,5 +79,18 @@ public class TeamsDao {
             System.out.println(e.getMessage());
         }
         return Collections.emptyList();
+    }
+
+    public Team getTeam(String teamName) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+        try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement pstmt = conn.prepareStatement(GET_TEAM_SQL);
+            pstmt.setString(1, teamName);
+            ResultSet result = pstmt.executeQuery();
+            return mapper.mapResult(result).getFirst();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }
