@@ -105,7 +105,7 @@ public class LoadExportHandler {
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
-                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName);
+                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName, "REGULAR_SEASON");
                 gamesPlayed.add(gamePlayed);
             }
             gamesHandler.load(gamesPlayed, season);
@@ -155,7 +155,7 @@ public class LoadExportHandler {
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
-                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName);
+                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName, "CONFERENCE_TOURNAMENT");
                 gamesPlayed.add(gamePlayed);
                 gamesPlayed.add(gamePlayed);
             }
@@ -196,7 +196,7 @@ public class LoadExportHandler {
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
-                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName);
+                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName, "NIT");
                 gamesPlayed.add(gamePlayed);
                 PostseasonGame nitGame = new PostseasonGame(gameId, season, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "NIT");
                 nitGames.add(nitGame);
@@ -239,17 +239,22 @@ public class LoadExportHandler {
                 Integer losingTeamScore = game.get("lost").get("pts").intValue();
                 String winningCoachName = determineCoachFromTeam(winningTeamId, allTeams);
                 String losingCoachName = determineCoachFromTeam(losingTeamId, allTeams);
+                String gameType = null;
+                if (loadFirstFour) {
+                    gameType = "FIRST_SIXTEEN";
+                } else {
+                    gameType = "NT";
+                }
                 Game gamePlayed = new Game(gameId, seasonYear, neutralSite,
                         homeTeamId, awayTeamId, homeTeamName, awayTeamName,
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
-                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName);
+                        losingTeamName, losingTeamScore, winningCoachName, losingCoachName, gameType);
                 gamesPlayed.add(gamePlayed);
                 PostseasonGame postseasonGame;
                 if (loadFirstFour) {
                     postseasonGame = new PostseasonGame(gameId, seasonYear, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "FIRST_SIXTEEN");
                 } else {
                     postseasonGame = new PostseasonGame(gameId, seasonYear, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "MAIN_FIELD");
-
                 }
                 postseasonGames.add(postseasonGame);
             }

@@ -36,4 +36,12 @@ public class GamesHandler {
         return gamesDao.getGamesLostForTeamInSeason(teamId, season);
     }
 
+    public List<Game> listAll() {
+        return gamesDao.listAll();
+    }
+
+    public void backload(List<Game> games) {
+        gamesDao.backload(games);
+    }
+
 }

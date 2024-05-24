@@ -15,7 +15,8 @@ public record Game(
         String losingTeamName,
         Integer losingTeamScore,
         String winningCoachName,
-        String losingCoachName
+        String losingCoachName,
+        String gameType
 ) {}
 
 
