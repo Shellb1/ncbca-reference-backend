@@ -1,6 +1,5 @@
 package com.reference.ncbca.dao.mappers;
 
-import com.reference.ncbca.model.ScheduleGame;
 import com.reference.ncbca.model.Season;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +20,8 @@ public class SeasonsMapper {
             String teamName = resultSet.getString("team_name");
             Integer gamesWon = resultSet.getInt("games_won");
             Integer gamesLost = resultSet.getInt("games_lost");
-            Season season = new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName);
+            String conferenceName = resultSet.getString("conference_name");
+            Season season = new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName, conferenceName);
             resultList.add(season);
         }
         return resultList;
@@ -34,6 +34,7 @@ public class SeasonsMapper {
         String teamName = resultSet.getString("team_name");
         Integer gamesWon = resultSet.getInt("games_won");
         Integer gamesLost = resultSet.getInt("games_lost");
-        return new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName);
+        String conferenceName = resultSet.getString("conference_name");
+        return new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName, conferenceName);
     }
 }

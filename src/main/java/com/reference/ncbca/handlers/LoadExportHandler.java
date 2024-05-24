@@ -264,6 +264,7 @@ public class LoadExportHandler {
             for (JsonNode jsonTeam : teamsArray) {
                 String teamName = jsonTeam.get("region").textValue() + " " + jsonTeam.get("name").textValue();
                 Integer teamId = jsonTeam.get("tid").intValue();
+                Integer conferenceId = jsonTeam.get("cid").intValue();
                 Integer gamesWon = determineGamesWon(teamId, season);
                 Integer gamesLost = determineGamesLost(teamId, season);
                 Coach coachOfTeam = coachesHandler.getCoachOfTeam(teamName);
@@ -271,7 +272,8 @@ public class LoadExportHandler {
                 if (coachOfTeam != null) {
                     coachName = coachOfTeam.coachName();
                 }
-                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, season, coachName));
+                String conferenceName = conferencesMap.get(conferenceId);
+                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, season, coachName, conferenceName));
             }
             seasonsHandler.load(seasons);
         }
