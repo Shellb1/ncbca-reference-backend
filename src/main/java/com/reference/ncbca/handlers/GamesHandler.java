@@ -40,6 +40,10 @@ public class GamesHandler {
         return gamesDao.listAll();
     }
 
+    public List<Game> getAllGamesInSeason(Integer season) {
+        return gamesDao.getAllGamesInSeason(season);
+    }
+
     public void backload(List<Game> games) {
         gamesDao.backload(games);
     }
