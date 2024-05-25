@@ -40,4 +40,8 @@ public class SeasonsHandler {
     public Season getSeasonForTeamAndYear(String teamName, Integer year) {
         return seasonsDao.getSeasonForTeamAndYear(teamName, year);
     }
+
+    public List<Season> listAllSeasons() {
+        return seasonsDao.listAllSeasons();
+    }
 }

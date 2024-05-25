@@ -27,6 +27,8 @@ public class SeasonsDao {
     private static final String FIND_SEASONS_BY_COACH_SQL = "SELECT * FROM Seasons WHERE coach_name = ?";
     private static final String FIND_SEASONS_BY_TEAM_SQL = "SELECT * FROM Seasons WHERE team_name = ?";
     private static final String GET_SEASON_BY_TEAM_AND_YEAR_SQL = "SELECT * FROM Seasons WHERE team_name = ? AND season = ?";
+    private static final String GET_ALL_SEASONS_SQL = "SELECT * FROM Seasons";
+
 
     private final SeasonsMapper mapper;
 
@@ -88,6 +90,18 @@ public class SeasonsDao {
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement preparedStatement = conn.prepareStatement(FIND_SEASONS_BY_TEAM_SQL);
             preparedStatement.setString(1, teamName);
+            ResultSet results = preparedStatement.executeQuery();
+            return mapper.mapResult(results);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    public List<Season> listAllSeasons() {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+        try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement preparedStatement = conn.prepareStatement(GET_ALL_SEASONS_SQL);
             ResultSet results = preparedStatement.executeQuery();
             return mapper.mapResult(results);
         } catch (SQLException e) {
