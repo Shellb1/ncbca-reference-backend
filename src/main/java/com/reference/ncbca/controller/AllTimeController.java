@@ -1,6 +1,7 @@
 package com.reference.ncbca.controller;
 
 import com.reference.ncbca.handlers.AllTimeHandler;
+import com.reference.ncbca.model.AllTimeCoachRanking;
 import com.reference.ncbca.model.AllTimeProgramRanking;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,5 +20,10 @@ public class AllTimeController {
     @GetMapping("/allTimeProgramRankings")
     public List<AllTimeProgramRanking> allTimeProgramRankingList() {
         return allTimeHandler.getAllTimeProgramRankings();
+    }
+
+    @GetMapping("/allTimeCoachRankings")
+    public List<AllTimeCoachRanking> allTimeCoachRankingsList() {
+        return allTimeHandler.getAllTimeCoachRankings();
     }
 }
