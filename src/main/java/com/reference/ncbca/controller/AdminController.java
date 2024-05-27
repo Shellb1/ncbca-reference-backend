@@ -1,6 +1,7 @@
 package com.reference.ncbca.controller;
 
 
+import com.opencsv.exceptions.CsvException;
 import com.reference.ncbca.handlers.BackloadingHandler;
 import com.reference.ncbca.handlers.LoadExportHandler;
 import com.reference.ncbca.handlers.LoadNBLHandler;
@@ -37,8 +38,9 @@ public class AdminController {
                            @RequestParam("loadCT") Boolean loadCT,
                            @RequestParam("loadNIT") Boolean loadNIT,
                            @RequestParam("loadFirstFour") Boolean loadFirstFour,
-                           @RequestParam("loadNT") Boolean loadNT) throws IOException {
-        loadExportHandler.loadExport(export, loadTeams, loadSeasons, loadGames, loadSchedules, loadCoaches, season, loadCT, loadNIT, loadFirstFour, loadNT);
+                           @RequestParam("loadNT") Boolean loadNT,
+                           @RequestParam("loadNTSeeds") Boolean loadNTSeeds) throws IOException, CsvException {
+        loadExportHandler.loadExport(export, loadTeams, loadSeasons, loadGames, loadSchedules, loadCoaches, season, loadCT, loadNIT, loadFirstFour, loadNT, loadNTSeeds);
     }
 
     @PostMapping("/loadNBL")

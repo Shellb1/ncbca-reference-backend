@@ -13,6 +13,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,11 +29,12 @@ public class LoadExportHandler {
     private final CoachesHandler coachesHandler;
     private final GamesHandler gamesHandler;
     private final PostseasonHandler postseasonHandler;
+    private final NTSeedsHandler ntSeedsHandler;
 
     @Value("classpath:databases/coaches.csv")
     private Resource coachesCsv;
 
-    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, PostseasonHandler postseasonHandler) {
+    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, PostseasonHandler postseasonHandler, NTSeedsHandler ntSeedsHandler) {
         this.conferencesMap = conferencesMap;
         this.teamsHandler = teamsHandler;
         this.seasonsHandler = seasonsHandler;
@@ -40,9 +42,10 @@ public class LoadExportHandler {
         this.coachesHandler = coachesHandler;
         this.gamesHandler = gamesHandler;
         this.postseasonHandler = postseasonHandler;
+        this.ntSeedsHandler = ntSeedsHandler;
     }
 
-    public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons, Boolean loadGames, Boolean loadSchedules, Boolean loadCoaches, Integer season, Boolean loadCt, Boolean loadNIT, Boolean loadFirstFour, Boolean loadNT) throws IOException {
+    public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons, Boolean loadGames, Boolean loadSchedules, Boolean loadCoaches, Integer season, Boolean loadCt, Boolean loadNIT, Boolean loadFirstFour, Boolean loadNT, Boolean loadNTSeeds) throws IOException, CsvException {
         byte[] fileBytes = file.getBytes();
 
         // Remove BOM if present
@@ -283,6 +286,22 @@ public class LoadExportHandler {
             seasonsHandler.load(seasons);
         }
 
+        if (loadNTSeeds) {
+            CSVReader reader = new CSVReader(new FileReader("src/main/resources/databases/nt_seeds.csv"));
+            List<String[]> lines = reader.readAll();
+            List<NTSeed> ntSeeds = new ArrayList<>();
+            List<Team> allTeams = teamsHandler.listAllTeams();
+            for (String[] seedLine: lines) {
+                Integer seed = Integer.valueOf(seedLine[0]);
+                for (var i = 1; i < seedLine.length; i++) {
+                    String teamName = seedLine[i];
+                    Integer teamId = determineTeamIdFromTeamName(teamName, allTeams);
+                    ntSeeds.add(new NTSeed(teamId, teamName, season, seed));
+                }
+            }
+            ntSeedsHandler.load(ntSeeds);
+        }
+
         parser.close();
     }
 
@@ -326,5 +345,14 @@ public class LoadExportHandler {
             }
         }
         return "";
+    }
+
+    private Integer determineTeamIdFromTeamName(String teamName, List<Team> teams) {
+        for (Team team: teams) {
+            if (team.name().equals(teamName)) {
+                return team.teamId();
+            }
+        }
+        return null;
     }
 }
