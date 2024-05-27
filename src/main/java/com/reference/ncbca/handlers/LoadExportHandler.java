@@ -13,7 +13,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,20 +27,18 @@ public class LoadExportHandler {
     private final ScheduleHandler scheduleHandler;
     private final CoachesHandler coachesHandler;
     private final GamesHandler gamesHandler;
-    private final PostseasonHandler postseasonHandler;
     private final NTSeedsHandler ntSeedsHandler;
 
     @Value("classpath:databases/coaches.csv")
     private Resource coachesCsv;
 
-    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, PostseasonHandler postseasonHandler, NTSeedsHandler ntSeedsHandler) {
+    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, NTSeedsHandler ntSeedsHandler) {
         this.conferencesMap = conferencesMap;
         this.teamsHandler = teamsHandler;
         this.seasonsHandler = seasonsHandler;
         this.scheduleHandler = scheduleHandler;
         this.coachesHandler = coachesHandler;
         this.gamesHandler = gamesHandler;
-        this.postseasonHandler = postseasonHandler;
         this.ntSeedsHandler = ntSeedsHandler;
     }
 
@@ -205,9 +202,6 @@ public class LoadExportHandler {
                 nitGames.add(nitGame);
             }
             gamesHandler.load(gamesPlayed, season);
-
-            // keep track of NIT games for each season
-            postseasonHandler.load(nitGames);
         }
 
         if (loadFirstFour || loadNT) {
@@ -262,8 +256,6 @@ public class LoadExportHandler {
                 postseasonGames.add(postseasonGame);
             }
             gamesHandler.load(gamesPlayed, season);
-            // keep track of NT games for each season
-            postseasonHandler.load(postseasonGames);
         }
 
         if (loadSeasons) {

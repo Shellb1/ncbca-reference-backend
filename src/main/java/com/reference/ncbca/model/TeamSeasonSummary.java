@@ -9,5 +9,6 @@ public record TeamSeasonSummary(
         int gamesLost,
         int seasonYear,
         String coach,
-        List<Game> games
+        List<Game> games,
+        Integer seed
 ) {}
