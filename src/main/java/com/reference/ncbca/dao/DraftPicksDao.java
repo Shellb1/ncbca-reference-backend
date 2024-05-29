@@ -1,6 +1,6 @@
 package com.reference.ncbca.dao;
 
-import com.reference.ncbca.model.DraftPick;
+import com.reference.ncbca.model.dao.DraftPick;
 import com.reference.ncbca.util.DaoHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository

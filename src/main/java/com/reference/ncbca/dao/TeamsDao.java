@@ -1,7 +1,7 @@
 package com.reference.ncbca.dao;
 
 import com.reference.ncbca.dao.mappers.TeamResultMapper;
-import com.reference.ncbca.model.Team;
+import com.reference.ncbca.model.dao.Team;
 import com.reference.ncbca.util.DaoHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;

@@ -1,10 +1,10 @@
 package com.reference.ncbca.handlers;
 
 import com.reference.ncbca.dao.CoachesDao;
-import com.reference.ncbca.model.Coach;
+import com.reference.ncbca.model.dao.Coach;
 import com.reference.ncbca.model.CoachSummary;
-import com.reference.ncbca.model.Game;
-import com.reference.ncbca.model.Season;
+import com.reference.ncbca.model.dao.Game;
+import com.reference.ncbca.model.dao.Season;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

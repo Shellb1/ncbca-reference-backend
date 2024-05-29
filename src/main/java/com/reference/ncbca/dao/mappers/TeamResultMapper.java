@@ -1,6 +1,6 @@
 package com.reference.ncbca.dao.mappers;
 
-import com.reference.ncbca.model.Team;
+import com.reference.ncbca.model.dao.Team;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;

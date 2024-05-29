@@ -1,7 +1,7 @@
 package com.reference.ncbca.controller;
 
 import com.reference.ncbca.handlers.TeamsHandler;
-import com.reference.ncbca.model.Team;
+import com.reference.ncbca.model.dao.Team;
 import com.reference.ncbca.model.TeamSeasonSummary;
 import com.reference.ncbca.model.TeamSummary;
 import org.springframework.web.bind.annotation.GetMapping;

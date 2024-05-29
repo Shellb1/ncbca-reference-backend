@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import com.reference.ncbca.model.*;
+import com.reference.ncbca.model.dao.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -165,7 +165,6 @@ public class LoadExportHandler {
         if (loadNIT) {
             JsonNode games = export.get("games");
             List<Game> gamesPlayed = new ArrayList<>();
-            List<PostseasonGame> nitGames = new ArrayList<>();
             // assumes all teams have been loaded
             List<Team> allTeams = teamsHandler.listAllActiveTeams();
             Integer currentGameId = gamesHandler.getLatestGameId(season);
@@ -198,8 +197,6 @@ public class LoadExportHandler {
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
                         losingTeamName, losingTeamScore, winningCoachName, losingCoachName, "NIT");
                 gamesPlayed.add(gamePlayed);
-                PostseasonGame nitGame = new PostseasonGame(gameId, season, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "NIT");
-                nitGames.add(nitGame);
             }
             gamesHandler.load(gamesPlayed, season);
         }
@@ -207,7 +204,6 @@ public class LoadExportHandler {
         if (loadFirstFour || loadNT) {
             JsonNode games = export.get("games");
             List<Game> gamesPlayed = new ArrayList<>();
-            List<PostseasonGame> postseasonGames = new ArrayList<>();
             // assumes all teams have been loaded
             List<Team> allTeams = teamsHandler.listAllActiveTeams();
             Integer currentGameId = gamesHandler.getLatestGameId(season);
@@ -247,13 +243,6 @@ public class LoadExportHandler {
                         winningTeamId, winningTeamName, winningTeamScore, losingTeamId,
                         losingTeamName, losingTeamScore, winningCoachName, losingCoachName, gameType);
                 gamesPlayed.add(gamePlayed);
-                PostseasonGame postseasonGame;
-                if (loadFirstFour) {
-                    postseasonGame = new PostseasonGame(gameId, seasonYear, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "FIRST_SIXTEEN");
-                } else {
-                    postseasonGame = new PostseasonGame(gameId, seasonYear, winningTeamId, losingTeamId, winningTeamScore, losingTeamScore, winningTeamName, losingTeamName, "MAIN_FIELD");
-                }
-                postseasonGames.add(postseasonGame);
             }
             gamesHandler.load(gamesPlayed, season);
         }

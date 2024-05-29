@@ -1,7 +1,7 @@
 package com.reference.ncbca.dao;
 
 import com.reference.ncbca.dao.mappers.SeasonsMapper;
-import com.reference.ncbca.model.Season;
+import com.reference.ncbca.model.dao.Season;
 import com.reference.ncbca.util.DaoHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -28,7 +28,7 @@ public class SeasonsDao {
     private static final String FIND_SEASONS_BY_TEAM_SQL = "SELECT * FROM Seasons WHERE team_name = ?";
     private static final String GET_SEASON_BY_TEAM_AND_YEAR_SQL = "SELECT * FROM Seasons WHERE team_name = ? AND season = ?";
     private static final String GET_ALL_SEASONS_SQL = "SELECT * FROM Seasons";
-
+    private static final String GET_MOST_RECENT_YEAR_SQL = "SELECT * FROM Seasons ORDER BY season DESC LIMIT 1";
 
     private final SeasonsMapper mapper;
 
@@ -124,5 +124,19 @@ public class SeasonsDao {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    public Integer determineMostRecentYear() {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+        try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement preparedStatement = conn.prepareStatement(GET_MOST_RECENT_YEAR_SQL);
+            ResultSet result = preparedStatement.executeQuery();
+            if (result.next()) {
+                return result.getInt("season");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return -1;
     }
 }

@@ -1,7 +1,7 @@
 package com.reference.ncbca.handlers;
 
 import com.reference.ncbca.dao.NTSeedsDao;
-import com.reference.ncbca.model.NTSeed;
+import com.reference.ncbca.model.dao.NTSeed;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

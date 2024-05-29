@@ -1,6 +1,6 @@
 package com.reference.ncbca.dao.mappers;
 
-import com.reference.ncbca.model.Season;
+import com.reference.ncbca.model.dao.Season;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;

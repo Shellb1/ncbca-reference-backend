@@ -1,7 +1,7 @@
 package com.reference.ncbca.handlers;
 
 import com.reference.ncbca.dao.SeasonsDao;
-import com.reference.ncbca.model.Season;
+import com.reference.ncbca.model.dao.Season;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -43,5 +43,9 @@ public class SeasonsHandler {
 
     public List<Season> listAllSeasons() {
         return seasonsDao.listAllSeasons();
+    }
+
+    public Integer determineMostRecentYear() {
+        return seasonsDao.determineMostRecentYear();
     }
 }

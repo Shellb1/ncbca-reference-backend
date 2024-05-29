@@ -1,4 +1,4 @@
-package com.reference.ncbca.model;
+package com.reference.ncbca.model.dao;
 
 public record Season(Integer teamId, String teamName, Integer gamesWon,
                      Integer gamesLost, Integer seasonYear,

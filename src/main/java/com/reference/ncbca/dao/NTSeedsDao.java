@@ -1,7 +1,7 @@
 package com.reference.ncbca.dao;
 
 import com.reference.ncbca.dao.mappers.NTSeedsMapper;
-import com.reference.ncbca.model.NTSeed;
+import com.reference.ncbca.model.dao.NTSeed;
 import com.reference.ncbca.util.DaoHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;

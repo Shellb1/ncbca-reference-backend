@@ -1,8 +1,7 @@
 package com.reference.ncbca.dao;
 
 import com.reference.ncbca.dao.mappers.ScheduleMapper;
-import com.reference.ncbca.model.Game;
-import com.reference.ncbca.model.ScheduleGame;
+import com.reference.ncbca.model.dao.ScheduleGame;
 import com.reference.ncbca.util.DaoHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;

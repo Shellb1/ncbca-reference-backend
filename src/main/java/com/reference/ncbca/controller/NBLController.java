@@ -2,7 +2,7 @@ package com.reference.ncbca.controller;
 
 import com.reference.ncbca.handlers.LoadNBLHandler;
 import com.reference.ncbca.handlers.NBLHandler;
-import com.reference.ncbca.model.DraftPick;
+import com.reference.ncbca.model.dao.DraftPick;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;

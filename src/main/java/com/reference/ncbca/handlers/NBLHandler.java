@@ -1,7 +1,7 @@
 package com.reference.ncbca.handlers;
 
 import com.reference.ncbca.dao.DraftPicksDao;
-import com.reference.ncbca.model.DraftPick;
+import com.reference.ncbca.model.dao.DraftPick;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

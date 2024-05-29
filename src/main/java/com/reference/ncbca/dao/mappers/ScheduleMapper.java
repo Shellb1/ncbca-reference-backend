@@ -1,7 +1,6 @@
 package com.reference.ncbca.dao.mappers;
 
-import com.reference.ncbca.model.ScheduleGame;
-import com.reference.ncbca.model.Team;
+import com.reference.ncbca.model.dao.ScheduleGame;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;

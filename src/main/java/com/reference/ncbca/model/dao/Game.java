@@ -1,4 +1,4 @@
-package com.reference.ncbca.model;
+package com.reference.ncbca.model.dao;
 
 public record Game(
         Integer gameId,

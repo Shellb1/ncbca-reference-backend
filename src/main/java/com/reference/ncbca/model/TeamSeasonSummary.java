@@ -1,5 +1,7 @@
 package com.reference.ncbca.model;
 
+import com.reference.ncbca.model.dao.Game;
+
 import java.util.List;
 
 public record TeamSeasonSummary(

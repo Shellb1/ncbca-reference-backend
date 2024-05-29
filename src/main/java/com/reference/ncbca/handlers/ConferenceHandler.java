@@ -1,10 +1,11 @@
 package com.reference.ncbca.handlers;
 
 import com.reference.ncbca.model.*;
+import com.reference.ncbca.model.dao.Game;
+import com.reference.ncbca.model.dao.Season;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ConferenceHandler {
@@ -29,6 +30,18 @@ public class ConferenceHandler {
         ConferenceSummary aacSummary = buildConferenceSummary(seasons, "American Athletic Conference", year, allGamesForSeason);
         ConferenceSummary mwcSummary = buildConferenceSummary(seasons, "Mountain West Conference", year,allGamesForSeason);
         return List.of(accSummary, b1gSummary, secSummary, pccSummary, sediciSummary, bigEastSummary, aacSummary, mwcSummary);
+    }
+
+    public ConferenceSummary getConferenceSummary(String conferenceName, Integer year) {
+        if (year == null) {
+            year = seasonsHandler.determineMostRecentYear();
+            if (year == -1) {
+                return null;
+            }
+        }
+        List<Season> seasons = seasonsHandler.listSeasonsForYear(year);
+        List<Game> allGamesForSeason = gamesHandler.getAllGamesInSeason(year);
+        return buildConferenceSummary(seasons, conferenceName, year, allGamesForSeason);
     }
 
     private ConferenceSummary buildConferenceSummary(List<Season> seasons, String conference, Integer year, List<Game> allGamesInyear) {

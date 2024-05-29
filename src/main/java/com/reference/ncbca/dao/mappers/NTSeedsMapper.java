@@ -1,7 +1,6 @@
 package com.reference.ncbca.dao.mappers;
 
-import com.reference.ncbca.model.NTSeed;
-import com.reference.ncbca.model.PostseasonGame;
+import com.reference.ncbca.model.dao.NTSeed;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;

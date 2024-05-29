@@ -1,7 +1,7 @@
 package com.reference.ncbca.handlers;
 
 import com.reference.ncbca.dao.GamesDao;
-import com.reference.ncbca.model.Game;
+import com.reference.ncbca.model.dao.Game;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

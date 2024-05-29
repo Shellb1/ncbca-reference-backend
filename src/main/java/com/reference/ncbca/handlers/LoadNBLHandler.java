@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.reference.ncbca.model.DraftPick;
-import com.reference.ncbca.model.Team;
+import com.reference.ncbca.model.dao.DraftPick;
+import com.reference.ncbca.model.dao.Team;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

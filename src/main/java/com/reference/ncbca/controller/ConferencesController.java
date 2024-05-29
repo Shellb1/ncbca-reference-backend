@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class ConferencesController {
@@ -20,5 +21,10 @@ public class ConferencesController {
     @GetMapping("/conferencesSummary")
     public List<ConferenceSummary> getConferenceSummariesForYear(@RequestParam("season") Integer season) {
         return conferenceHandler.getConferenceSummaries(season);
+    }
+
+    @GetMapping("/conferenceSummary")
+    public ConferenceSummary getConferenceSummary(@RequestParam("conferenceName") String conferenceName, @RequestParam("season") Optional<Integer> season) {
+        return conferenceHandler.getConferenceSummary(conferenceName, season.orElse(null));
     }
 }

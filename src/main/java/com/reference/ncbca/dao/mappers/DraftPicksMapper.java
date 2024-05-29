@@ -1,6 +1,6 @@
 package com.reference.ncbca.dao.mappers;
 
-import com.reference.ncbca.model.DraftPick;
+import com.reference.ncbca.model.dao.DraftPick;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;

@@ -1,14 +1,12 @@
 package com.reference.ncbca.dao;
 
 import com.reference.ncbca.dao.mappers.GamesMapper;
-import com.reference.ncbca.model.Game;
+import com.reference.ncbca.model.dao.Game;
 import com.reference.ncbca.util.DaoHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
