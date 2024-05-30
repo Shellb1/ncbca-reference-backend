@@ -48,4 +48,8 @@ public class GamesHandler {
         gamesDao.backload(games);
     }
 
+    public List<Game> getAllGamesForTeamInSeason(String teamName, Integer season) {
+        return gamesDao.getAllGamesForTeamInSeason(teamName, season);
+    }
+
 }

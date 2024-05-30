@@ -18,6 +18,12 @@ public class ConferencesController {
         this.conferenceHandler = conferenceHandler;
     }
 
+    /**
+     * Retrieves the summaries of conferences for a specific season.
+     *
+     * @param season The season for which to retrieve the conference summaries.
+     * @return A list of ConferenceSummary objects representing the conferences for the specified season.
+     */
     @GetMapping("/conferencesSummary")
     public List<ConferenceSummary> getConferenceSummariesForYear(@RequestParam("season") Integer season) {
         return conferenceHandler.getConferenceSummaries(season);

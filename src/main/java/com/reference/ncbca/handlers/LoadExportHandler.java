@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import com.reference.ncbca.model.SeasonMetrics;
 import com.reference.ncbca.model.dao.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -17,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class LoadExportHandler {
@@ -28,11 +30,12 @@ public class LoadExportHandler {
     private final CoachesHandler coachesHandler;
     private final GamesHandler gamesHandler;
     private final NTSeedsHandler ntSeedsHandler;
+    private final SeasonMetricsHandler seasonMetricsHandler;
 
     @Value("classpath:databases/coaches.csv")
     private Resource coachesCsv;
 
-    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, NTSeedsHandler ntSeedsHandler) {
+    public LoadExportHandler(Map<Integer, String> conferencesMap, TeamsHandler teamsHandler, SeasonsHandler seasonsHandler, ScheduleHandler scheduleHandler, CoachesHandler coachesHandler, GamesHandler gamesHandler, NTSeedsHandler ntSeedsHandler, SeasonMetricsHandler seasonMetricsHandler) {
         this.conferencesMap = conferencesMap;
         this.teamsHandler = teamsHandler;
         this.seasonsHandler = seasonsHandler;
@@ -40,9 +43,10 @@ public class LoadExportHandler {
         this.coachesHandler = coachesHandler;
         this.gamesHandler = gamesHandler;
         this.ntSeedsHandler = ntSeedsHandler;
+        this.seasonMetricsHandler = seasonMetricsHandler;
     }
 
-    public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons, Boolean loadGames, Boolean loadSchedules, Boolean loadCoaches, Integer season, Boolean loadCt, Boolean loadNIT, Boolean loadFirstFour, Boolean loadNT, Boolean loadNTSeeds) throws IOException, CsvException {
+    public void loadExport(MultipartFile file, Boolean loadTeams, Boolean loadSeasons, Boolean loadGames, Boolean loadSchedules, Boolean loadCoaches, Integer season, Boolean loadCt, Boolean loadNIT, Boolean loadFirstFour, Boolean loadNT, Boolean loadNTSeeds, Boolean loadStats) throws IOException, CsvException {
         byte[] fileBytes = file.getBytes();
 
         // Remove BOM if present
@@ -283,10 +287,98 @@ public class LoadExportHandler {
             ntSeedsHandler.load(ntSeeds);
         }
 
+        if (loadStats) {
+            List<Game> allGamesForSeason = gamesHandler.getAllGamesInSeason(season);
+            List<SeasonMetrics> seasonMetrics = new ArrayList<>();
+            for (Season seasonModel: seasonsHandler.listSeasonsForYear(season)) {
+                Integer teamId = seasonModel.teamId();
+                double rpi = calculateRPI(teamId, allGamesForSeason);
+                double sos = calculateSOS(teamId, allGamesForSeason);
+                seasonMetrics.add(new SeasonMetrics(seasonModel.teamName(), seasonModel.teamId(), seasonModel.seasonYear(), rpi, sos));
+            }
+            seasonMetricsHandler.load(seasonMetrics);
+        }
+
         parser.close();
     }
 
-    private String determineCoachFromTeam(Integer teamId, List<Team> allTeams) {
+    private double calculateSOS(Integer teamId, List<Game> allGamesForSeason) {
+        double opponentsWinningPercentage = calculateOpponentsWinningPercentage(teamId, allGamesForSeason);
+        double opponentsOpponentsWinningPercentage = calculateOpponentsOpponentsWinningPercentage(teamId, allGamesForSeason);
+        return (2 * opponentsWinningPercentage + opponentsOpponentsWinningPercentage) / 3;
+    }
+
+    private double calculateRPI(Integer teamId, List<Game> allGamesForSeason) {
+        double teamWinningPercentage = calculateTeamWinPercentage(teamId, allGamesForSeason);
+        double opponentsWinningPercentage = calculateOpponentsWinningPercentage(teamId, allGamesForSeason);
+        double opponentsOpponentsWinningPercentage = calculateOpponentsOpponentsWinningPercentage(teamId, allGamesForSeason);
+        return (0.25 * teamWinningPercentage) + (0.50 * opponentsWinningPercentage) + (0.25 * opponentsOpponentsWinningPercentage);
+    }
+
+    private double calculateOpponentsWinningPercentage(Integer teamId, List<Game> allGamesForSeason) {
+        List<Game> gamesTeamTookPartIn = allGamesForSeason.stream()
+                .filter(game -> Objects.equals(game.homeTeamId(), teamId) || Objects.equals(game.awayTeamId(), teamId))
+                .toList();
+        List<Integer> opponents = gamesTeamTookPartIn.stream()
+                .map(game -> Objects.equals(game.homeTeamId(), teamId) ? game.awayTeamId() : game.homeTeamId())
+                .distinct()
+                .toList();
+
+        double totalOpponentsWinPercentage = opponents.stream()
+                .mapToDouble(opponentId -> calculateTeamWinPercentage(opponentId, allGamesForSeason))
+                .average().orElse(0.0);
+
+        return totalOpponentsWinPercentage;
+    }
+
+    private double calculateOpponentsOpponentsWinningPercentage(Integer teamId, List<Game> allGamesForSeason) {
+        List<Game> gamesTeamTookPartIn = allGamesForSeason.stream()
+                .filter(game -> Objects.equals(game.homeTeamId(), teamId) || Objects.equals(game.awayTeamId(), teamId))
+                .toList();
+        List<Integer> opponents = gamesTeamTookPartIn.stream()
+                .map(game -> Objects.equals(game.homeTeamId(), teamId) ? game.awayTeamId() : game.homeTeamId())
+                .distinct()
+                .toList();
+
+        List<Integer> opponentsOfOpponents = opponents.stream()
+                .flatMap(opponentId -> getGamesForTeam(opponentId, allGamesForSeason).stream())
+                .map(game -> Objects.equals(game.homeTeamId(), teamId) ? game.awayTeamId() : game.homeTeamId())
+                .distinct()
+                .toList();
+
+        double totalOpponentsOpponentsWinPercentage = opponentsOfOpponents.stream()
+                .mapToDouble(opponentOfOpponentId -> calculateTeamWinPercentage(opponentOfOpponentId, allGamesForSeason))
+                .average().orElse(0.0);
+
+        return totalOpponentsOpponentsWinPercentage;
+    }
+
+    private double calculateTeamWinPercentage(Integer teamId, List<Game> allGamesForSeason) {
+        Integer gamesWon = determineGamesWonFromGames(teamId, allGamesForSeason);
+        Integer gamesLost = determineGamesLostFromGames(teamId, allGamesForSeason);
+        return (double) gamesWon / (gamesWon + gamesLost);
+    }
+
+    private Integer determineGamesLostFromGames(Integer teamId, List<Game> allGamesForSeason) {
+        return (int) allGamesForSeason.stream()
+                .filter(game -> Objects.equals(game.losingTeamId(), teamId))
+                .count();
+    }
+
+    private Integer determineGamesWonFromGames(Integer teamId, List<Game> allGamesForSeason) {
+        return (int) allGamesForSeason.stream()
+                .filter(game -> Objects.equals(game.winningTeamId(), teamId))
+                .count();
+    }
+
+    private List<Game> getGamesForTeam(Integer teamId, List<Game> allGamesForSeason) {
+        return allGamesForSeason.stream()
+                .filter(game -> Objects.equals(game.homeTeamId(), teamId) || Objects.equals(game.awayTeamId(), teamId))
+                .collect(Collectors.toList());
+    }
+
+
+private String determineCoachFromTeam(Integer teamId, List<Team> allTeams) {
         for (Team team: allTeams) {
             if (Objects.equals(team.teamId(), teamId)) {
                 return team.coach();

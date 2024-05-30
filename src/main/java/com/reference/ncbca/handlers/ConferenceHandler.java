@@ -21,15 +21,25 @@ public class ConferenceHandler {
     public List<ConferenceSummary> getConferenceSummaries(Integer year) {
         List<Season> seasons = seasonsHandler.listSeasonsForYear(year);
         List<Game> allGamesForSeason = gamesHandler.getAllGamesInSeason(year);
-        ConferenceSummary accSummary = buildConferenceSummary(seasons, "Atlantic Coast Conference", year, allGamesForSeason);
-        ConferenceSummary b1gSummary = buildConferenceSummary(seasons, "Big Ten Conference", year, allGamesForSeason);
-        ConferenceSummary secSummary = buildConferenceSummary(seasons, "Southeastern Conference", year, allGamesForSeason);
-        ConferenceSummary pccSummary = buildConferenceSummary(seasons, "Pacific Coast Conference", year, allGamesForSeason);
-        ConferenceSummary sediciSummary = buildConferenceSummary(seasons, "Big Sedici Conference", year, allGamesForSeason);
-        ConferenceSummary bigEastSummary = buildConferenceSummary(seasons, "Big East Conference", year, allGamesForSeason);
-        ConferenceSummary aacSummary = buildConferenceSummary(seasons, "American Athletic Conference", year, allGamesForSeason);
-        ConferenceSummary mwcSummary = buildConferenceSummary(seasons, "Mountain West Conference", year,allGamesForSeason);
-        return List.of(accSummary, b1gSummary, secSummary, pccSummary, sediciSummary, bigEastSummary, aacSummary, mwcSummary);
+        List<ConferenceSummary> conferenceSummaries = new ArrayList<>();
+
+        List<String> conferenceNames = Arrays.asList(
+                "Atlantic Coast Conference",
+                "Big Ten Conference",
+                "Southeastern Conference",
+                "Pacific Coast Conference",
+                "Big Sedici Conference",
+                "Big East Conference",
+                "American Athletic Conference",
+                "Mountain West Conference"
+        );
+
+        for (String conferenceName : conferenceNames) {
+            ConferenceSummary conferenceSummary = buildConferenceSummary(seasons, conferenceName, year, allGamesForSeason);
+            conferenceSummaries.add(conferenceSummary);
+        }
+
+        return conferenceSummaries;
     }
 
     public ConferenceSummary getConferenceSummary(String conferenceName, Integer year) {
