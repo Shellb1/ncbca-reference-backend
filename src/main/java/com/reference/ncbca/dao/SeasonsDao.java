@@ -40,16 +40,16 @@ public class SeasonsDao {
         try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
             PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL);
             for (Season season : seasons) {
-                pstmt.setInt(1, season.teamId());
-                pstmt.setString(2, season.teamName());
-                if (season.coach() != null) {
-                    pstmt.setString(3, season.coach());
+                pstmt.setInt(1, season.getTeamId());
+                pstmt.setString(2, season.getTeamName());
+                if (season.getCoach() != null) {
+                    pstmt.setString(3, season.getCoach());
                 } else {
                     pstmt.setNull(3, Types.VARCHAR);
                 }
-                pstmt.setInt(4, season.gamesWon());
-                pstmt.setInt(5, season.gamesLost());
-                pstmt.setInt(6, season.seasonYear());
+                pstmt.setInt(4, season.getGamesWon());
+                pstmt.setInt(5, season.getGamesLost());
+                pstmt.setInt(6, season.getSeasonYear());
                 pstmt.addBatch();
             }
             pstmt.executeBatch();

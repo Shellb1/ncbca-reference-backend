@@ -2,7 +2,7 @@ package com.reference.ncbca.controller;
 
 
 import com.reference.ncbca.handlers.SeasonMetricsHandler;
-import com.reference.ncbca.model.SeasonMetrics;
+import com.reference.ncbca.model.dao.SeasonMetrics;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;

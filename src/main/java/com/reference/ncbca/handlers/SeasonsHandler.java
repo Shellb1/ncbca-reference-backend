@@ -2,6 +2,7 @@ package com.reference.ncbca.handlers;
 
 import com.reference.ncbca.dao.SeasonsDao;
 import com.reference.ncbca.model.dao.Season;
+import com.reference.ncbca.model.dao.SeasonMetrics;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -11,8 +12,10 @@ import java.util.List;
 public class SeasonsHandler {
 
     private final SeasonsDao seasonsDao;
+    private final SeasonMetricsHandler seasonMetricsHandler;
 
-    public SeasonsHandler(SeasonsDao seasonsDao) {
+    public SeasonsHandler(SeasonsDao seasonsDao, SeasonMetricsHandler seasonMetricsHandler) {
+        this.seasonMetricsHandler = seasonMetricsHandler;
         this.seasonsDao = seasonsDao;
     }
 
@@ -23,13 +26,22 @@ public class SeasonsHandler {
 
     public List<Season> listSeasonsForYear(Integer year) {
         List<Season> seasons = seasonsDao.findSeasonsByYear(year);
-        seasons.sort((o1, o2) -> o2.gamesWon().compareTo(o1.gamesWon()));
+        List<SeasonMetrics> metrics = seasonMetricsHandler.getSeasonMetricsForSeason(year);
+        for (Season season: seasons) {
+            for (SeasonMetrics metric: metrics) {
+                if (season.getTeamId().equals(metric.teamId())) {
+                   season.setSeasonMetrics(metric);
+                   break;
+                }
+            }
+        }
+        seasons.sort((o1, o2) -> o2.getGamesWon().compareTo(o1.getGamesWon()));
         return seasons;
     }
 
     public List<Season> listSeasonsForCoach(String coach) {
         List<Season> seasons = seasonsDao.findSeasonsByCoachName(coach);
-        seasons.sort(Comparator.comparing(Season::seasonYear));
+        seasons.sort(Comparator.comparing(Season::getSeasonYear));
         return seasons;
     }
 

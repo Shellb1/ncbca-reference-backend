@@ -21,7 +21,7 @@ public class SeasonsMapper {
             Integer gamesWon = resultSet.getInt("games_won");
             Integer gamesLost = resultSet.getInt("games_lost");
             String conferenceName = resultSet.getString("conference_name");
-            Season season = new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName, conferenceName);
+            Season season = new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName, conferenceName, null);
             resultList.add(season);
         }
         return resultList;
@@ -35,6 +35,6 @@ public class SeasonsMapper {
         Integer gamesWon = resultSet.getInt("games_won");
         Integer gamesLost = resultSet.getInt("games_lost");
         String conferenceName = resultSet.getString("conference_name");
-        return new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName, conferenceName);
+        return new Season(teamId, teamName, gamesWon, gamesLost, seasonYear, coachName, conferenceName, null);
     }
 }

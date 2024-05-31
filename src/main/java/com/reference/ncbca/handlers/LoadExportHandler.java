@@ -7,8 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import com.reference.ncbca.model.SeasonMetrics;
+import com.reference.ncbca.model.dao.SeasonMetrics;
 import com.reference.ncbca.model.dao.*;
+import com.reference.ncbca.util.SrsCalculator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -266,7 +267,7 @@ public class LoadExportHandler {
                     coachName = coachOfTeam.coachName();
                 }
                 String conferenceName = conferencesMap.get(conferenceId);
-                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, season, coachName, conferenceName));
+                seasons.add(new Season(teamId, teamName, gamesWon, gamesLost, season, coachName, conferenceName, null));
             }
             seasonsHandler.load(seasons);
         }
@@ -290,11 +291,14 @@ public class LoadExportHandler {
         if (loadStats) {
             List<Game> allGamesForSeason = gamesHandler.getAllGamesInSeason(season);
             List<SeasonMetrics> seasonMetrics = new ArrayList<>();
+            Map<Integer, Double> srs = SrsCalculator.calculateSRS(allGamesForSeason, 0.001, 10000);
+
             for (Season seasonModel: seasonsHandler.listSeasonsForYear(season)) {
-                Integer teamId = seasonModel.teamId();
+                Integer teamId = seasonModel.getTeamId();
                 double rpi = calculateRPI(teamId, allGamesForSeason);
                 double sos = calculateSOS(teamId, allGamesForSeason);
-                seasonMetrics.add(new SeasonMetrics(seasonModel.teamName(), seasonModel.teamId(), seasonModel.seasonYear(), rpi, sos));
+                double srsValue = srs.getOrDefault(teamId, 0.0);
+                seasonMetrics.add(new SeasonMetrics(seasonModel.getTeamName(), seasonModel.getTeamId(), seasonModel.getSeasonYear(), rpi, sos, srsValue));
             }
             seasonMetricsHandler.load(seasonMetrics);
         }

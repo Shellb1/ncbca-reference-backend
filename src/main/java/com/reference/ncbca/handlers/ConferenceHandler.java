@@ -55,12 +55,12 @@ public class ConferenceHandler {
     }
 
     private ConferenceSummary buildConferenceSummary(List<Season> seasons, String conference, Integer year, List<Game> allGamesInyear) {
-        List<Season> conferenceSeasons = seasons.stream().filter(season -> season.conferenceName().equals(conference)).toList();
+        List<Season> conferenceSeasons = seasons.stream().filter(season -> season.getConferenceName().equals(conference)).toList();
         List<ConferenceRecord> conferenceRecordList = new ArrayList<>();
         for (Season season: conferenceSeasons) {
-            String teamName = season.teamName();
-            String conferenceName = season.conferenceName();
-            String overallRecord = buildRecord(season.gamesWon(), season.gamesLost());
+            String teamName = season.getTeamName();
+            String conferenceName = season.getConferenceName();
+            String overallRecord = buildRecord(season.getGamesWon(), season.getGamesLost());
             String conferenceRecord = determineConferenceRecord(teamName, allGamesInyear);
             ConferenceRecord record = new ConferenceRecord(teamName, conferenceName, overallRecord, conferenceRecord, year);
             conferenceRecordList.add(record);

@@ -60,23 +60,23 @@ public class AllTimeHandler {
             Integer seasonsCoached = coachSeasons.size();
             Integer allTimeWins = getAllTimeWins(coachSeasons);
             Integer allTimeLosses = getAllTimeLosses(coachSeasons);
-            String currentTeam = coachSeasons.getLast().teamName();
+            String currentTeam = coachSeasons.getLast().getTeamName();
             Integer championships = determineChampionshipsWonForCoach(allGames, coachSeasons);
             Integer final4s = determineFinalFoursForCoach(allGames, coachSeasons);
             Integer elite8s = determineElite8sForCoach(allGames, coachSeasons);
             Integer sweet16s = determineSweet16sForCoach(allGames, coachSeasons);
-            Integer tourneyAppearances = determineTournamentAppearancesForCoach(allGames, coach, coachSeasons);
+            Integer tourneyAppearances = determineTournamentAppearancesForCoach(allGames, coachSeasons);
             AllTimeCoachRanking allTimeCoachRanking = new AllTimeCoachRanking(coachName, seasonsCoached, allTimeWins, allTimeLosses, currentTeam, championships, final4s, elite8s, sweet16s, tourneyAppearances);
             allTimeCoachRankings.add(allTimeCoachRanking);
         }
         return allTimeCoachRankings.stream().sorted(Comparator.comparing(AllTimeCoachRanking::wins).reversed()).toList();
     }
 
-    private Integer determineTournamentAppearancesForCoach(List<Game> allGames, Coach coach, List<Season> coachSeasons) {
+    private Integer determineTournamentAppearancesForCoach(List<Game> allGames, List<Season> coachSeasons) {
         Integer appearances = 0;
         for (Season season: coachSeasons) {
-            String teamName = season.teamName();
-            Integer year = season.seasonYear();
+            String teamName = season.getTeamName();
+            Integer year = season.getSeasonYear();
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (!ntGamesPlayedByTeam.isEmpty()) {
                 appearances++;
@@ -88,8 +88,8 @@ public class AllTimeHandler {
     private Integer determineSweet16sForCoach(List<Game> allGames, List<Season> coachSeasons) {
         Integer sweetSixteens = 0;
         for (Season season: coachSeasons) {
-            String teamName = season.teamName();
-            Integer year = season.seasonYear();
+            String teamName = season.getTeamName();
+            Integer year = season.getSeasonYear();
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (ntGamesPlayedByTeam.size() == 2) {
                 sweetSixteens++;
@@ -101,8 +101,8 @@ public class AllTimeHandler {
     private Integer determineElite8sForCoach(List<Game> allGames, List<Season> coachSeasons) {
         Integer eliteEights = 0;
         for (Season season: coachSeasons) {
-            String teamName = season.teamName();
-            Integer year = season.seasonYear();
+            String teamName = season.getTeamName();
+            Integer year = season.getSeasonYear();
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (ntGamesPlayedByTeam.size() == 3) {
                 eliteEights++;
@@ -114,8 +114,8 @@ public class AllTimeHandler {
     private Integer determineFinalFoursForCoach(List<Game> allGames, List<Season> coachSeasons) {
         Integer finalFours = 0;
         for (Season season: coachSeasons) {
-            String teamName = season.teamName();
-            Integer year = season.seasonYear();
+            String teamName = season.getTeamName();
+            Integer year = season.getSeasonYear();
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (ntGamesPlayedByTeam.size() == 4) {
                 finalFours++;
@@ -127,8 +127,8 @@ public class AllTimeHandler {
     private Integer determineChampionshipsWonForCoach(List<Game> allGames, List<Season> coachSeasons) {
         Integer championshipsWon = 0;
         for (Season season: coachSeasons) {
-            String teamName = season.teamName();
-            Integer year = season.seasonYear();
+            String teamName = season.getTeamName();
+            Integer year = season.getSeasonYear();
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (ntGamesPlayedByTeam.size() == 5 && ntGamesPlayedByTeam.get(4).winningTeamName().equals(teamName)) {
                 championshipsWon++;
@@ -138,13 +138,13 @@ public class AllTimeHandler {
     }
 
     private List<Season> getAllSeasonsForCoach(List<Season> allSeasons, String coachName) {
-        return allSeasons.stream().filter(season -> season.coach() != null && season.coach().equals(coachName)).sorted(Comparator.comparing(Season::seasonYear)).toList();
+        return allSeasons.stream().filter(season -> season.getCoach() != null && season.getCoach().equals(coachName)).sorted(Comparator.comparing(Season::getSeasonYear)).toList();
     }
 
 
     private Integer determineTournamentAppearances(List<Game> allGames, String teamName, List<Season> teamSeasons) {
         Integer tourneyAppearances = 0;
-        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::seasonYear).sorted().toList();
+        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::getSeasonYear).sorted().toList();
         for (Integer year: yearsPlayed) {
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> (game.gameType().equals("NT") || game.gameType().equals("FIRST_SIXTEEN")) && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (!ntGamesPlayedByTeam.isEmpty()) {
@@ -156,7 +156,7 @@ public class AllTimeHandler {
 
     private Integer determineSweet16s(List<Game> allGames, String teamName, List<Season> teamSeasons) {
         Integer sweetSixteens = 0;
-        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::seasonYear).sorted().toList();
+        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::getSeasonYear).sorted().toList();
         for (Integer year: yearsPlayed) {
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (ntGamesPlayedByTeam.size() >= 2) {
@@ -168,7 +168,7 @@ public class AllTimeHandler {
 
     private Integer determineElite8s(List<Game> allGames, String teamName, List<Season> teamSeasons) {
         Integer eliteEights = 0;
-        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::seasonYear).sorted().toList();
+        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::getSeasonYear).sorted().toList();
         for (Integer year: yearsPlayed) {
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (ntGamesPlayedByTeam.size() >= 3) {
@@ -180,7 +180,7 @@ public class AllTimeHandler {
 
     private Integer determineFinalFours(List<Game> allGames, String teamName, List<Season> teamSeasons) {
         Integer finalFours = 0;
-        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::seasonYear).sorted().toList();
+        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::getSeasonYear).sorted().toList();
         for (Integer year: yearsPlayed) {
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (ntGamesPlayedByTeam.size() >= 4) {
@@ -192,7 +192,7 @@ public class AllTimeHandler {
 
     private Integer determineChampionshipsWon(List<Game> allGames, String teamName, List<Season> teamSeasons) {
         Integer championshipsWon = 0;
-        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::seasonYear).sorted().toList();
+        List<Integer> yearsPlayed = teamSeasons.stream().map(Season::getSeasonYear).sorted().toList();
         for (Integer year: yearsPlayed) {
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
             if (ntGamesPlayedByTeam.size() == 5 && ntGamesPlayedByTeam.get(4).winningTeamName().equals(teamName)) {
@@ -205,7 +205,7 @@ public class AllTimeHandler {
     private Integer getAllTimeLosses(List<Season> teamSeasons) {
         int losses = 0;
         for (Season season: teamSeasons) {
-            losses = losses + season.gamesLost();
+            losses = losses + season.getGamesLost();
         }
         return losses;
     }
@@ -213,12 +213,12 @@ public class AllTimeHandler {
     private Integer getAllTimeWins(List<Season> teamSeasons) {
         int wins = 0;
         for (Season season: teamSeasons) {
-            wins = wins + season.gamesWon();
+            wins = wins + season.getGamesWon();
         }
         return wins;
     }
 
     private List<Season> getAllSeasonsForTeam(List<Season> allSeasons, String name) {
-        return allSeasons.stream().filter(season -> season.teamName().equals(name)).toList();
+        return allSeasons.stream().filter(season -> season.getTeamName().equals(name)).toList();
     }
 }

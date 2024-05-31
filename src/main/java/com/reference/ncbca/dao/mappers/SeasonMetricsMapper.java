@@ -1,6 +1,6 @@
 package com.reference.ncbca.dao.mappers;
 
-import com.reference.ncbca.model.SeasonMetrics;
+import com.reference.ncbca.model.dao.SeasonMetrics;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
@@ -20,7 +20,9 @@ public class SeasonMetricsMapper {
             Integer season = resultSet.getInt("season");
             double rpi = resultSet.getDouble("rpi");
             double sos = resultSet.getDouble("sos");
-            resultList.add(new SeasonMetrics(teamName, teamId, season, rpi, sos));
+            double srs = resultSet.getDouble("srs");
+
+            resultList.add(new SeasonMetrics(teamName, teamId, season, rpi, sos, srs));
         }
         return resultList;
 

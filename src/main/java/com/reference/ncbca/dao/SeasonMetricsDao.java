@@ -1,7 +1,7 @@
 package com.reference.ncbca.dao;
 
 import com.reference.ncbca.dao.mappers.SeasonMetricsMapper;
-import com.reference.ncbca.model.SeasonMetrics;
+import com.reference.ncbca.model.dao.SeasonMetrics;
 import com.reference.ncbca.util.DaoHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -26,7 +25,7 @@ public class SeasonMetricsDao {
     private String password;
 
     private final SeasonMetricsMapper mapper;
-    private static final String LOAD_METRICS_SQL = "INSERT INTO season_metrics (team_id, team_name, season, rpi, sos) VALUES (?, ?, ?, ?, ?)";
+    private static final String LOAD_METRICS_SQL = "INSERT INTO season_metrics (team_id, team_name, season, rpi, sos, srs) VALUES (?, ?, ?, ?, ?, ?)";
     public SeasonMetricsDao(SeasonMetricsMapper seasonMetricsMapper) {
         this.mapper = seasonMetricsMapper;
     }
@@ -40,6 +39,7 @@ public class SeasonMetricsDao {
                 statement.setInt(3, metrics.season());
                 statement.setDouble(4, metrics.rpi());
                 statement.setDouble(5, metrics.sos());
+                statement.setDouble(6, metrics.srs());
                 statement.addBatch();
             }
             statement.executeBatch();
