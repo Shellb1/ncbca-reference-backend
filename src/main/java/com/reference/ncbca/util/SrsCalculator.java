@@ -9,8 +9,8 @@ import java.util.Map;
 public class SrsCalculator {
 
     public static Map<Integer, Double> calculateSRS(List<Game> games, double tolerance, int maxIterations) {
-        Map<Integer, Integer> totalPointsFor = new HashMap<>();
-        Map<Integer, Integer> totalPointsAgainst = new HashMap<>();
+        Map<Integer, Double> totalPointsFor = new HashMap<>();
+        Map<Integer, Double> totalPointsAgainst = new HashMap<>();
         Map<Integer, Integer> gamesPlayed = new HashMap<>();
         Map<Integer, Double> srs = new HashMap<>();
 
@@ -18,16 +18,16 @@ public class SrsCalculator {
         for (Game game : games) {
             int homeTeamId = game.homeTeamId();
             int awayTeamId = game.awayTeamId();
-            int homePoints = game.winningTeamId().equals(homeTeamId) ? game.winningTeamScore() : game.losingTeamScore();
-            int awayPoints = game.winningTeamId().equals(awayTeamId) ? game.winningTeamScore() : game.losingTeamScore();
-            int homePointsAgainst = game.winningTeamId().equals(homeTeamId) ? game.losingTeamScore() : game.winningTeamScore();
-            int awayPointsAgainst = game.winningTeamId().equals(awayTeamId) ? game.losingTeamScore() : game.winningTeamScore();
+            double homePoints = game.winningTeamId().equals(homeTeamId) ? game.winningTeamScore() : game.losingTeamScore();
+            double awayPoints = game.winningTeamId().equals(awayTeamId) ? game.winningTeamScore() : game.losingTeamScore();
+            double homePointsAgainst = game.winningTeamId().equals(homeTeamId) ? game.losingTeamScore() : game.winningTeamScore();
+            double awayPointsAgainst = game.winningTeamId().equals(awayTeamId) ? game.losingTeamScore() : game.winningTeamScore();
 
-            totalPointsFor.put(homeTeamId, totalPointsFor.getOrDefault(homeTeamId, 0) + homePoints);
-            totalPointsFor.put(awayTeamId, totalPointsFor.getOrDefault(awayTeamId, 0) + awayPoints);
+            totalPointsFor.put(homeTeamId, totalPointsFor.getOrDefault(homeTeamId, 0.0) + homePoints);
+            totalPointsFor.put(awayTeamId, totalPointsFor.getOrDefault(awayTeamId, 0.0) + awayPoints);
 
-            totalPointsAgainst.put(homeTeamId, totalPointsAgainst.getOrDefault(homeTeamId, 0) + homePointsAgainst);
-            totalPointsAgainst.put(awayTeamId, totalPointsAgainst.getOrDefault(awayTeamId, 0) + awayPointsAgainst);
+            totalPointsAgainst.put(homeTeamId, totalPointsAgainst.getOrDefault(homeTeamId, 0.0) + homePointsAgainst);
+            totalPointsAgainst.put(awayTeamId, totalPointsAgainst.getOrDefault(awayTeamId, 0.0) + awayPointsAgainst);
 
             gamesPlayed.put(homeTeamId, gamesPlayed.getOrDefault(homeTeamId, 0) + 1);
             gamesPlayed.put(awayTeamId, gamesPlayed.getOrDefault(awayTeamId, 0) + 1);
@@ -65,10 +65,7 @@ public class SrsCalculator {
                 }
 
                 double sos = totalOpponentSRS / opponentGames;
-                double pointsFor = totalPointsFor.get(teamId);
-                double pointsAgainst = totalPointsAgainst.get(teamId);
-                double gamesPlayedByTeam = gamesPlayed.get(teamId);
-                double avgPointDifferential = (pointsFor - pointsAgainst) / gamesPlayedByTeam;
+                double avgPointDifferential = (totalPointsFor.get(teamId) - totalPointsAgainst.get(teamId)) / gamesPlayed.get(teamId);
                 double newSrsValue = avgPointDifferential + sos;
 
                 newSrs.put(teamId, newSrsValue);
@@ -86,4 +83,3 @@ public class SrsCalculator {
         return srs;
     }
 }
-

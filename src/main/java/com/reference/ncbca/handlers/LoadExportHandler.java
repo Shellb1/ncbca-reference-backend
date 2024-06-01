@@ -9,6 +9,8 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import com.reference.ncbca.model.dao.SeasonMetrics;
 import com.reference.ncbca.model.dao.*;
+import com.reference.ncbca.util.RpiCalculator;
+import com.reference.ncbca.util.SosCalculator;
 import com.reference.ncbca.util.SrsCalculator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -296,8 +298,9 @@ public class LoadExportHandler {
 
             for (Season seasonModel: seasonsHandler.listSeasonsForYear(season)) {
                 Integer teamId = seasonModel.getTeamId();
-                double rpi = calculateRPI(teamId, allGamesForSeason);
-                double sos = calculateSOS(teamId, allGamesForSeason);
+                List<Game> onlyGamesInExport = allGamesForSeason.stream().filter(game -> game.gameType().equals("REGULAR_SEASON") || game.gameType().equals("CONFERENCE_TOURNAMENT") || game.gameType().equals("NT")).toList();
+                double sos = SosCalculator.calculateSOS(teamId, onlyGamesInExport);
+                double rpi = RpiCalculator.calculateRPI(teamId, onlyGamesInExport, sos);
                 double srsValue = srs.getOrDefault(teamId, 0.0);
                 seasonMetrics.add(new SeasonMetrics(seasonModel.getTeamName(), seasonModel.getTeamId(), seasonModel.getSeasonYear(), rpi, sos, srsValue));
             }
@@ -307,98 +310,7 @@ public class LoadExportHandler {
         parser.close();
     }
 
-    private double calculateSOS(Integer teamId, List<Game> allGamesForSeason) {
-        double opponentsWinningPercentage = calculateOpponentsWinningPercentage(teamId, allGamesForSeason);
-        double opponentsOpponentsWinningPercentage = calculateOpponentsOpponentsWinningPercentage(teamId, allGamesForSeason);
-        return (2 * opponentsWinningPercentage + opponentsOpponentsWinningPercentage) / 3;
-    }
 
-    private double calculateRPI(Integer teamId, List<Game> allGamesForSeason) {
-        double teamWinningPercentage = calculateWeightedTeamWinPercentage(teamId, allGamesForSeason);
-        double opponentsWinningPercentage = calculateOpponentsWinningPercentage(teamId, allGamesForSeason);
-        double opponentsOpponentsWinningPercentage = calculateOpponentsOpponentsWinningPercentage(teamId, allGamesForSeason);
-        return (0.25 * teamWinningPercentage) + (0.50 * opponentsWinningPercentage) + (0.25 * opponentsOpponentsWinningPercentage);
-    }
-
-    private double calculateOpponentsWinningPercentage(Integer teamId, List<Game> allGamesForSeason) {
-        List<Game> gamesTeamTookPartIn = allGamesForSeason.stream()
-                .filter(game -> game.homeTeamId().equals(teamId) || game.awayTeamId().equals(teamId))
-                .toList();
-        List<Integer> opponents = gamesTeamTookPartIn.stream()
-                .map(game -> Objects.equals(game.homeTeamId(), teamId) ? game.awayTeamId() : game.homeTeamId())
-                .distinct()
-                .toList();
-
-        double totalOpponentsWinPercentage = opponents.stream()
-                .mapToDouble(opponentId -> calculateTeamWinPercentage(opponentId, allGamesForSeason))
-                .average().orElse(0.0);
-
-        return totalOpponentsWinPercentage;
-    }
-
-    private double calculateOpponentsOpponentsWinningPercentage(Integer teamId, List<Game> allGamesForSeason) {
-        List<Game> gamesTeamTookPartIn = allGamesForSeason.stream()
-                .filter(game -> Objects.equals(game.homeTeamId(), teamId) || Objects.equals(game.awayTeamId(), teamId))
-                .toList();
-        List<Integer> opponents = gamesTeamTookPartIn.stream()
-                .map(game -> Objects.equals(game.homeTeamId(), teamId) ? game.awayTeamId() : game.homeTeamId())
-                .distinct()
-                .toList();
-
-        List<Integer> opponentsOfOpponents = opponents.stream()
-                .flatMap(opponentId -> getGamesForTeam(opponentId, allGamesForSeason).stream())
-                .map(game -> Objects.equals(game.homeTeamId(), teamId) ? game.awayTeamId() : game.homeTeamId())
-                .distinct()
-                .toList();
-
-        double totalOpponentsOpponentsWinPercentage = opponentsOfOpponents.stream()
-                .mapToDouble(opponentOfOpponentId -> calculateTeamWinPercentage(opponentOfOpponentId, allGamesForSeason))
-                .average().orElse(0.0);
-
-        return totalOpponentsOpponentsWinPercentage;
-    }
-
-    private double calculateTeamWinPercentage(Integer teamId, List<Game> allGamesForSeason) {
-        Integer gamesWon = determineGamesWonFromGames(teamId, allGamesForSeason);
-        Integer gamesLost = determineGamesLostFromGames(teamId, allGamesForSeason);
-        return (double) gamesWon / (gamesWon + gamesLost);
-    }
-
-    private double calculateWeightedTeamWinPercentage(Integer teamId, List<Game> allGamesForSeason) {
-        double gamesWon = determineWeightedGamesWonFromGames(teamId, allGamesForSeason);
-        double gamesLost = determineWeightedGamesLostFromGames(teamId, allGamesForSeason);
-        return gamesWon / (gamesWon + gamesLost);
-    }
-
-    private Integer determineGamesLostFromGames(Integer teamId, List<Game> allGamesForSeason) {
-        return (int) allGamesForSeason.stream()
-                .filter(game -> Objects.equals(game.losingTeamId(), teamId))
-                .count();
-    }
-
-    private Integer determineGamesWonFromGames(Integer teamId, List<Game> allGamesForSeason) {
-        return (int) allGamesForSeason.stream()
-                .filter(game -> Objects.equals(game.winningTeamId(), teamId))
-                .count();
-    }
-
-    private double determineWeightedGamesLostFromGames(Integer teamId, List<Game> allGamesForSeason) {
-        List<Game> lostHomeGames = allGamesForSeason.stream().filter(game -> game.losingTeamId().equals(teamId) && game.homeTeamId().equals(teamId)).toList();
-        List<Game> lostAwayGames = allGamesForSeason.stream().filter(game -> game.losingTeamId().equals(teamId) && game.awayTeamId().equals(teamId)).toList();
-        return (lostHomeGames.size() * 1.4) + (lostAwayGames.size() * 0.6) + lostAwayGames.size();
-    }
-
-    private double determineWeightedGamesWonFromGames(Integer teamId, List<Game> allGamesForSeason) {
-        List<Game> wonHomeGames = allGamesForSeason.stream().filter(game -> game.winningTeamId().equals(teamId) && game.homeTeamId().equals(teamId)).toList();
-        List<Game> wonAwayGames = allGamesForSeason.stream().filter(game -> game.winningTeamId().equals(teamId) && game.awayTeamId().equals(teamId)).toList();
-        return (wonHomeGames.size() * 0.6) + (wonAwayGames.size() * 1.4) + wonAwayGames.size();
-    }
-
-    private List<Game> getGamesForTeam(Integer teamId, List<Game> allGamesForSeason) {
-        return allGamesForSeason.stream()
-                .filter(game -> Objects.equals(game.homeTeamId(), teamId) || Objects.equals(game.awayTeamId(), teamId))
-                .collect(Collectors.toList());
-    }
 
 
 private String determineCoachFromTeam(Integer teamId, List<Team> allTeams) {
