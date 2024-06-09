@@ -79,6 +79,7 @@ public class GamesDao {
                     pstmt.setInt(13, game.losingTeamScore());
                     pstmt.setString(14, game.winningCoachName());
                     pstmt.setString(15, game.losingCoachName());
+                    pstmt.setString(16, game.gameType());
                     pstmt.addBatch();
                 } else {
                     System.out.println("Game with ID " + game.gameId() + " already exists in the database. Skipping insertion.");

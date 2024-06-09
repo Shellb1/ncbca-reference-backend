@@ -9,6 +9,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import com.reference.ncbca.model.dao.SeasonMetrics;
 import com.reference.ncbca.model.dao.*;
+import com.reference.ncbca.util.ExportUtils;
 import com.reference.ncbca.util.RpiCalculator;
 import com.reference.ncbca.util.SosCalculator;
 import com.reference.ncbca.util.SrsCalculator;
@@ -21,7 +22,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class LoadExportHandler {
@@ -294,15 +294,18 @@ public class LoadExportHandler {
             List<Game> allGamesForSeason = gamesHandler.getAllGamesInSeason(season);
             allGamesForSeason.removeIf(game -> game.gameType().equals("FIRST_SIXTEEN") || game.gameType().equals("NIT"));
             List<SeasonMetrics> seasonMetrics = new ArrayList<>();
-            Map<Integer, Double> srs = SrsCalculator.calculateSRS(allGamesForSeason, 0.001, 10000);
-
-            for (Season seasonModel: seasonsHandler.listSeasonsForYear(season)) {
+            List<Season> seasonsForYear = seasonsHandler.listSeasonsForYear(season);
+//            Map<Integer, Double> srs = SrsCalculator.calculateSRS(seasonsForYear, allGamesForSeason, 0.001, 10000);
+            for (Season seasonModel: seasonsForYear) {
                 Integer teamId = seasonModel.getTeamId();
-                List<Game> onlyGamesInExport = allGamesForSeason.stream().filter(game -> game.gameType().equals("REGULAR_SEASON") || game.gameType().equals("CONFERENCE_TOURNAMENT") || game.gameType().equals("NT")).toList();
-                double sos = SosCalculator.calculateSOS(teamId, onlyGamesInExport);
-                double rpi = RpiCalculator.calculateRPI(teamId, onlyGamesInExport, sos);
-                double srsValue = srs.getOrDefault(teamId, 0.0);
-                seasonMetrics.add(new SeasonMetrics(seasonModel.getTeamName(), seasonModel.getTeamId(), seasonModel.getSeasonYear(), rpi, sos, srsValue));
+                JsonNode seasonFromExport = ExportUtils.getCurrentSeasonFromExport(teamId, export, season);
+                Integer gamesWonHome = seasonFromExport.get("wonHome").intValue();
+                Integer gamesWonAway = seasonFromExport.get("wonAway").intValue();
+                Integer gamesLostHome = seasonFromExport.get("lostHome").intValue();
+                Integer gamesLostAway = seasonFromExport.get("lostAway").intValue();
+                double sos = SosCalculator.calculateSOS(teamId, allGamesForSeason);
+                double rpi = RpiCalculator.calculateRPI(gamesWonHome, gamesWonAway, gamesLostHome, gamesLostAway, sos);
+                seasonMetrics.add(new SeasonMetrics(seasonModel.getTeamName(), seasonModel.getTeamId(), seasonModel.getSeasonYear(), rpi, sos, 0.0));
             }
             seasonMetricsHandler.load(seasonMetrics);
         }
@@ -310,10 +313,7 @@ public class LoadExportHandler {
         parser.close();
     }
 
-
-
-
-private String determineCoachFromTeam(Integer teamId, List<Team> allTeams) {
+    private String determineCoachFromTeam(Integer teamId, List<Team> allTeams) {
         for (Team team: allTeams) {
             if (Objects.equals(team.teamId(), teamId)) {
                 return team.coach();

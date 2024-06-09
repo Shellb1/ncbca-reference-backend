@@ -18,7 +18,6 @@ public class GameUtils {
         return allGamesForSeason.stream()
                 .filter(game -> game.homeTeamId().equals(teamId) || game.awayTeamId().equals(teamId))
                 .map(game -> game.homeTeamId().equals(teamId) ? game.awayTeamId() : game.homeTeamId())
-                .distinct()
                 .collect(Collectors.toList());
     }
 
