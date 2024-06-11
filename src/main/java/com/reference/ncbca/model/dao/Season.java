@@ -9,6 +9,7 @@ public class Season {
     private String coach;
     private String conferenceName;
     private SeasonMetrics seasonMetrics;
+    private Integer ntSeed;
 
     public Season() {
     }
@@ -86,5 +87,13 @@ public class Season {
 
     public void setSeasonMetrics(SeasonMetrics seasonMetrics) {
         this.seasonMetrics = seasonMetrics;
+    }
+
+    public void setNtSeed(Integer ntSeed) {
+        this.ntSeed = ntSeed;
+    }
+
+    public Integer getNtSeed() {
+        return ntSeed;
     }
 }
