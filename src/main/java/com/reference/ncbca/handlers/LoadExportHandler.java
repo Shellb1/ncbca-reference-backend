@@ -9,10 +9,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import com.reference.ncbca.model.dao.SeasonMetrics;
 import com.reference.ncbca.model.dao.*;
-import com.reference.ncbca.util.ExportUtils;
-import com.reference.ncbca.util.RpiCalculator;
-import com.reference.ncbca.util.SosCalculator;
-import com.reference.ncbca.util.SrsCalculator;
+import com.reference.ncbca.util.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -295,7 +292,6 @@ public class LoadExportHandler {
             allGamesForSeason.removeIf(game -> game.gameType().equals("FIRST_SIXTEEN") || game.gameType().equals("NIT"));
             List<SeasonMetrics> seasonMetrics = new ArrayList<>();
             List<Season> seasonsForYear = seasonsHandler.listSeasonsForYear(season);
-//            Map<Integer, Double> srs = SrsCalculator.calculateSRS(seasonsForYear, allGamesForSeason, 0.001, 10000);
             for (Season seasonModel: seasonsForYear) {
                 Integer teamId = seasonModel.getTeamId();
                 JsonNode seasonFromExport = ExportUtils.getCurrentSeasonFromExport(teamId, export, season);
@@ -305,9 +301,11 @@ public class LoadExportHandler {
                 Integer gamesLostAway = seasonFromExport.get("lostAway").intValue();
                 double sos = SosCalculator.calculateSOS(teamId, allGamesForSeason);
                 double rpi = RpiCalculator.calculateRPI(gamesWonHome, gamesWonAway, gamesLostHome, gamesLostAway, sos);
+                double possessions = PossessionsCalculator.calculatePossesionsForSeason(export, teamId);
+                System.out.println("Possessions for " + teamId + ": " + possessions);
                 seasonMetrics.add(new SeasonMetrics(seasonModel.getTeamName(), seasonModel.getTeamId(), seasonModel.getSeasonYear(), rpi, sos, 0.0));
             }
-            seasonMetricsHandler.load(seasonMetrics);
+//            seasonMetricsHandler.load(seasonMetrics);
         }
 
         parser.close();
