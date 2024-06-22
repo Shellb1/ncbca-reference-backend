@@ -91,7 +91,7 @@ public class AllTimeHandler {
             String teamName = season.getTeamName();
             Integer year = season.getSeasonYear();
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
-            if (ntGamesPlayedByTeam.size() == 2) {
+            if (ntGamesPlayedByTeam.size() >= 2) {
                 sweetSixteens++;
             }
         }
@@ -104,7 +104,7 @@ public class AllTimeHandler {
             String teamName = season.getTeamName();
             Integer year = season.getSeasonYear();
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
-            if (ntGamesPlayedByTeam.size() == 3) {
+            if (ntGamesPlayedByTeam.size() >= 3) {
                 eliteEights++;
             }
         }
@@ -117,7 +117,7 @@ public class AllTimeHandler {
             String teamName = season.getTeamName();
             Integer year = season.getSeasonYear();
             List<Game> ntGamesPlayedByTeam = allGames.stream().filter(game -> game.gameType().equals("NT") && Objects.equals(game.season(), year) && (game.winningTeamName().contentEquals(teamName) || game.losingTeamName().contentEquals(teamName))).sorted(Comparator.comparing(Game::gameId)).toList();
-            if (ntGamesPlayedByTeam.size() == 4) {
+            if (ntGamesPlayedByTeam.size() >= 4) {
                 finalFours++;
             }
         }
