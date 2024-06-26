@@ -22,8 +22,12 @@ public class CoachesHandler {
         this.gamesHandler = gamesHandler;
     }
 
-    public void load(List<Coach> coaches) {
-        coachesDao.load(coaches);
+    public void load(List<Coach> coaches, Integer season) {
+        coachesDao.updateCoaches(coaches);
+    }
+
+    private void markRetiredCoaches(List<Coach> retiredCoaches, Integer season) {
+        coachesDao.markRetiredCoaches(retiredCoaches, season);
     }
 
     public Coach getCoachOfTeam(String teamName) {

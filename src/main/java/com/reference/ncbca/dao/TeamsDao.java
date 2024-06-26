@@ -93,4 +93,18 @@ public class TeamsDao {
         }
         return null;
     }
+
+    public void retireTeams(List<Team> teamsToRetire) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+        try (Connection conn = DaoHelper.connect(CONNECTION_STRING)) {
+            PreparedStatement pstmt = conn.prepareStatement("UPDATE teams SET active = false WHERE team_name = ?");
+            for (Team team : teamsToRetire) {
+                pstmt.setString(1, team.name());
+                pstmt.executeUpdate();
+            }
+            pstmt.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

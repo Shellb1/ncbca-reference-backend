@@ -61,8 +61,8 @@ public class LoadExportHandler {
         ObjectNode export = mapper.readTree(parser);
 
         if (loadCoaches) {
-            List<Coach> coaches = getCoachList();
-            coachesHandler.load(coaches);
+            List<Coach> coaches = getCoachList(season);
+            coachesHandler.load(coaches, season);
         }
         if (loadTeams) {
             List<Team> teams = new ArrayList<>();
@@ -305,7 +305,7 @@ public class LoadExportHandler {
                 System.out.println("Possessions for " + teamId + ": " + possessions);
                 seasonMetrics.add(new SeasonMetrics(seasonModel.getTeamName(), seasonModel.getTeamId(), seasonModel.getSeasonYear(), rpi, sos, 0.0));
             }
-//            seasonMetricsHandler.load(seasonMetrics);
+            seasonMetricsHandler.load(seasonMetrics);
         }
 
         parser.close();
@@ -328,13 +328,13 @@ public class LoadExportHandler {
         return gamesHandler.determineGamesLostForTeam(teamId, season);
     }
 
-    private List<Coach> getCoachList() throws IOException {
+    private List<Coach> getCoachList(Integer season) throws IOException {
         List<Coach> coaches = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new FileReader(coachesCsv.getFile()))) {
             List<String[]> lines = reader.readAll();
             for (String[] line : lines) {
                 if (!line[1].isBlank()) {
-                    Coach coach = new Coach(line[1], 2078, null, true, line[0]);
+                    Coach coach = new Coach(line[1], season, null, true, line[0]);
                     coaches.add(coach);
                 }
             }

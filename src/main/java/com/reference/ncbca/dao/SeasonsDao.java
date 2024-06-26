@@ -22,7 +22,7 @@ public class SeasonsDao {
     @Value("${database.password}")
     private String password;
 
-    private static final String INSERT_SQL = "INSERT INTO Seasons (team_id, team_name, coach_name, games_won, games_lost, season) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE team_name = VALUES(team_name), coach_name = VALUES(coach_name), games_won = VALUES(games_won), games_lost = VALUES(games_lost), season = VALUES(season);";
+    private static final String INSERT_SQL = "INSERT INTO Seasons (team_id, team_name, coach_name, games_won, games_lost, season, conference_name) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE team_name = VALUES(team_name), coach_name = VALUES(coach_name), games_won = VALUES(games_won), games_lost = VALUES(games_lost), season = VALUES(season);";
     private static final String FIND_SEASONS_BY_YEAR_SQL = "SELECT * FROM Seasons WHERE season = ?";
     private static final String FIND_SEASONS_BY_COACH_SQL = "SELECT * FROM Seasons WHERE coach_name = ?";
     private static final String FIND_SEASONS_BY_TEAM_SQL = "SELECT * FROM Seasons WHERE team_name = ?";
@@ -50,6 +50,7 @@ public class SeasonsDao {
                 pstmt.setInt(4, season.getGamesWon());
                 pstmt.setInt(5, season.getGamesLost());
                 pstmt.setInt(6, season.getSeasonYear());
+                pstmt.setString(7, season.getConferenceName());
                 pstmt.addBatch();
             }
             pstmt.executeBatch();

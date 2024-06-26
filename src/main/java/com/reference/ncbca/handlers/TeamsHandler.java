@@ -6,6 +6,7 @@ import com.reference.ncbca.model.*;
 import com.reference.ncbca.model.dao.*;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,21 @@ public class TeamsHandler {
     }
 
     public void loadTeams(List<Team> teams) {
-        teamsDao.insert(teams);
+        List<Team> currentTeams = listAllActiveTeams();
+        List<Team> newTeams = new ArrayList<>();
+        for (Team team: teams) {
+            if (!currentTeams.contains(team)) {
+                newTeams.add(team);
+            }
+        }
+        List<Team> teamsToRetire = new ArrayList<>();
+        for (Team team: currentTeams) {
+            if (!teams.contains(team)) {
+                teamsToRetire.add(team);
+            }
+        }
+        teamsDao.insert(newTeams);
+        teamsDao.retireTeams(teamsToRetire);
     }
 
     public List<Team> listAllActiveTeams() {

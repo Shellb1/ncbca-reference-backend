@@ -24,7 +24,6 @@ public class SeasonsHandler {
     }
 
     public void load(List<Season> seasons) {
-
         seasonsDao.load(seasons);
     }
 
