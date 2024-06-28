@@ -17,34 +17,29 @@ public class SrsCalculator {
         // Step 1: Calculate total points for and against for each team
         for (Season teamSeason : seasonsForYear) {
             int teamId = teamSeason.getTeamId();
-            double pointsFor = games.stream().mapToDouble(game -> {
-                if (game.winningTeamId().equals(teamId)) {
-                    return game.winningTeamScore();
-                }
-                if (game.losingTeamId().equals(teamId)) {
-                    return game.losingTeamScore();
-                }
-                return 0.0;
-            }).sum();
-            double pointsAgainst = games.stream().mapToDouble(game -> {
-                if (game.winningTeamId().equals(teamId)) {
-                    return game.losingTeamScore();
-                }
-                if (game.losingTeamId().equals(teamId)) {
-                    return game.winningTeamScore();
-                }
-                return 0.0;
-            }).sum();
-            totalPointsFor.put(teamId, pointsFor);
-            totalPointsAgainst.put(teamId, pointsAgainst);
+            totalPointsFor.put(teamId, 0.0);
+            totalPointsAgainst.put(teamId, 0.0);
+        }
+
+        for (Game game : games) {
+            int winningTeamId = game.winningTeamId();
+            int losingTeamId = game.losingTeamId();
+            double winningTeamScore = game.winningTeamScore();
+            double losingTeamScore = game.losingTeamScore();
+
+            totalPointsFor.put(winningTeamId, totalPointsFor.get(winningTeamId) + winningTeamScore);
+            totalPointsAgainst.put(winningTeamId, totalPointsAgainst.get(winningTeamId) + losingTeamScore);
+
+            totalPointsFor.put(losingTeamId, totalPointsFor.get(losingTeamId) + losingTeamScore);
+            totalPointsAgainst.put(losingTeamId, totalPointsAgainst.get(losingTeamId) + winningTeamScore);
         }
 
         // Step 2: Initialize SRS with average point differentials
         for (Integer teamId : totalPointsFor.keySet()) {
             double pointsFor = totalPointsFor.get(teamId);
             double pointsAgainst = totalPointsAgainst.get(teamId);
-            double gamesPlayedByTeam = games.stream().filter(game -> game.homeTeamId().equals(teamId) || game.awayTeamId().equals(teamId)).count();
-            double initialSRS = (pointsFor - pointsAgainst) / gamesPlayedByTeam;
+            long gamesPlayedByTeam = games.stream().filter(game -> game.homeTeamId().equals(teamId) || game.awayTeamId().equals(teamId)).count();
+            double initialSRS = (gamesPlayedByTeam > 0) ? (pointsFor - pointsAgainst) / gamesPlayedByTeam : 0.0;
             srs.put(teamId, initialSRS);
         }
 
@@ -62,17 +57,17 @@ public class SrsCalculator {
 
                 for (Game game : games) {
                     if (game.homeTeamId().equals(teamId)) {
-                        totalOpponentSRS += srs.get(game.awayTeamId());
+                        totalOpponentSRS += srs.getOrDefault(game.awayTeamId(), 0.0);
                         opponentGames++;
                     } else if (game.awayTeamId().equals(teamId)) {
-                        totalOpponentSRS += srs.get(game.homeTeamId());
+                        totalOpponentSRS += srs.getOrDefault(game.homeTeamId(), 0.0);
                         opponentGames++;
                     }
                 }
 
-                double sos = totalOpponentSRS / opponentGames;
-                double gamesPlayedByTeam = games.stream().filter(game -> game.homeTeamId().equals(teamId) || game.awayTeamId().equals(teamId)).count();
-                double avgPointDifferential = (totalPointsFor.get(teamId) - totalPointsAgainst.get(teamId)) / gamesPlayedByTeam;
+                double sos = (opponentGames > 0) ? totalOpponentSRS / opponentGames : 0.0;
+                long gamesPlayedByTeam = games.stream().filter(game -> game.homeTeamId().equals(teamId) || game.awayTeamId().equals(teamId)).count();
+                double avgPointDifferential = (gamesPlayedByTeam > 0) ? (totalPointsFor.get(teamId) - totalPointsAgainst.get(teamId)) / gamesPlayedByTeam : 0.0;
                 double newSrsValue = avgPointDifferential + sos;
 
                 newSrs.put(teamId, newSrsValue);

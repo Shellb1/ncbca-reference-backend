@@ -25,7 +25,14 @@ public class SeasonMetricsDao {
     private String password;
 
     private final SeasonMetricsMapper mapper;
-    private static final String LOAD_METRICS_SQL = "INSERT INTO season_metrics (team_id, team_name, season, rpi, sos, srs) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String LOAD_METRICS_SQL =
+            "INSERT INTO season_metrics (team_id, team_name, season, rpi, sos, srs) " +
+                    "VALUES (?, ?, ?, ?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE " +
+                    "team_name = VALUES(team_name), " +
+                    "rpi = VALUES(rpi), " +
+                    "sos = VALUES(sos), " +
+                    "srs = VALUES(srs)";
     public SeasonMetricsDao(SeasonMetricsMapper seasonMetricsMapper) {
         this.mapper = seasonMetricsMapper;
     }

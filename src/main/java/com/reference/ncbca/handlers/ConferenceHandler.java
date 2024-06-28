@@ -90,7 +90,7 @@ public class ConferenceHandler {
     private List<Game> determineConferenceGamesTeamWasInvolvedIn(String teamName, List<Game> allGamesInyear) {
         allGamesInyear.sort(Comparator.comparing(Game::gameId));
         List<Game> allGamesForTeam = allGamesInyear.stream().filter(game -> game.gameType().equals("REGULAR_SEASON") && (game.winningTeamName().equals(teamName) || game.losingTeamName().equals(teamName))).toList();
-        if (allGamesForTeam.size() < 12) {
+        if (allGamesForTeam.size() <= 12) {
             return Collections.emptyList();
         } else {
             return allGamesInyear.stream().filter(game -> game.gameType().equals("REGULAR_SEASON") && (game.winningTeamName().equals(teamName) || game.losingTeamName().equals(teamName))).toList().subList(11, 33);

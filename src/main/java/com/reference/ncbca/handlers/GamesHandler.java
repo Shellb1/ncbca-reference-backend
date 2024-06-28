@@ -16,6 +16,8 @@ public class GamesHandler {
     }
 
     public void load(List<Game> games, Integer season) {
+        List<Game> gamesPlayed = getAllGamesInSeason(season);
+        games.removeIf(gamesPlayed::contains);
         gamesDao.load(games, season);
     }
 

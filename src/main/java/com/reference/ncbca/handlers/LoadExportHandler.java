@@ -292,6 +292,7 @@ public class LoadExportHandler {
             allGamesForSeason.removeIf(game -> game.gameType().equals("FIRST_SIXTEEN") || game.gameType().equals("NIT"));
             List<SeasonMetrics> seasonMetrics = new ArrayList<>();
             List<Season> seasonsForYear = seasonsHandler.listSeasonsForYear(season);
+            Map<Integer, Double> srsMap = SrsCalculator.calculateSRS(seasonsForYear, allGamesForSeason, 0.01, 1000);
             for (Season seasonModel: seasonsForYear) {
                 Integer teamId = seasonModel.getTeamId();
                 JsonNode seasonFromExport = ExportUtils.getCurrentSeasonFromExport(teamId, export, season);
@@ -301,9 +302,10 @@ public class LoadExportHandler {
                 Integer gamesLostAway = seasonFromExport.get("lostAway").intValue();
                 double sos = SosCalculator.calculateSOS(teamId, allGamesForSeason);
                 double rpi = RpiCalculator.calculateRPI(gamesWonHome, gamesWonAway, gamesLostHome, gamesLostAway, sos);
-                double possessions = PossessionsCalculator.calculatePossesionsForSeason(export, teamId);
-                System.out.println("Possessions for " + teamId + ": " + possessions);
-                seasonMetrics.add(new SeasonMetrics(seasonModel.getTeamName(), seasonModel.getTeamId(), seasonModel.getSeasonYear(), rpi, sos, 0.0));
+                double srs = srsMap.get(teamId);
+//                double possessions = PossessionsCalculator.calculatePossesionsForSeason(export, teamId);
+//                System.out.println("Possessions for " + teamId + ": " + possessions);
+                seasonMetrics.add(new SeasonMetrics(seasonModel.getTeamName(), seasonModel.getTeamId(), seasonModel.getSeasonYear(), rpi, sos, srs));
             }
             seasonMetricsHandler.load(seasonMetrics);
         }
