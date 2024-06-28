@@ -74,7 +74,7 @@ public class ConferenceHandler {
     }
 
     private String determineConferenceRecord(String teamName, List<Game> allGamesInyear) {
-        List<Game> conferenceGamesTeamWasInvolvedIn = determineGamesTeamWasInvolvedIn(teamName, allGamesInyear);
+        List<Game> conferenceGamesTeamWasInvolvedIn = determineConferenceGamesTeamWasInvolvedIn(teamName, allGamesInyear);
         Integer gamesWon = 0;
         Integer gamesLost = 0;
         for (Game game: conferenceGamesTeamWasInvolvedIn) {
@@ -87,9 +87,14 @@ public class ConferenceHandler {
         return buildRecord(gamesWon, gamesLost);
     }
 
-    private List<Game> determineGamesTeamWasInvolvedIn(String teamName, List<Game> allGamesInyear) {
+    private List<Game> determineConferenceGamesTeamWasInvolvedIn(String teamName, List<Game> allGamesInyear) {
         allGamesInyear.sort(Comparator.comparing(Game::gameId));
-        return allGamesInyear.stream().filter(game -> game.gameType().equals("REGULAR_SEASON") && (game.winningTeamName().equals(teamName) || game.losingTeamName().equals(teamName))).toList().subList(11, 33);
+        List<Game> allGamesForTeam = allGamesInyear.stream().filter(game -> game.gameType().equals("REGULAR_SEASON") && (game.winningTeamName().equals(teamName) || game.losingTeamName().equals(teamName))).toList();
+        if (allGamesForTeam.size() < 12) {
+            return Collections.emptyList();
+        } else {
+            return allGamesInyear.stream().filter(game -> game.gameType().equals("REGULAR_SEASON") && (game.winningTeamName().equals(teamName) || game.losingTeamName().equals(teamName))).toList().subList(11, 33);
+        }
     }
 
     private String buildRecord(Integer gamesWon, Integer gamesLost) {
