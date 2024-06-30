@@ -27,4 +27,8 @@ public class NTSeedsHandler {
     public List<NTSeed> getAllSeedsForTeam(String teamName) {
         return ntSeedsDao.getAllNTSeedsForTeam(teamName);
     }
+
+    public List<NTSeed> getAllSeedsForSeason(Integer season) {
+        return ntSeedsDao.getAllNTSeedsForSeason(season);
+    }
 }

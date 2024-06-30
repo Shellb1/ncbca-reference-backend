@@ -305,7 +305,14 @@ public class LoadExportHandler {
                 double srs = srsMap.get(teamId);
 //                double possessions = PossessionsCalculator.calculatePossesionsForSeason(export, teamId);
 //                System.out.println("Possessions for " + teamId + ": " + possessions);
-                seasonMetrics.add(new SeasonMetrics(seasonModel.getTeamName(), seasonModel.getTeamId(), seasonModel.getSeasonYear(), rpi, sos, srs));
+                SeasonMetrics metrics = new SeasonMetrics();
+                metrics.setTeamName(seasonModel.getTeamName());
+                metrics.setTeamId(seasonModel.getTeamId());
+                metrics.setSeason(seasonModel.getSeasonYear());
+                metrics.setRpi(rpi);
+                metrics.setSos(sos);
+                metrics.setSrs(srs);
+                seasonMetrics.add(metrics);
             }
             seasonMetricsHandler.load(seasonMetrics);
         }

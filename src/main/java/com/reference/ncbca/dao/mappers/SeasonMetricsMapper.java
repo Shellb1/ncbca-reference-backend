@@ -22,7 +22,14 @@ public class SeasonMetricsMapper {
             double sos = resultSet.getDouble("sos");
             double srs = resultSet.getDouble("srs");
 
-            resultList.add(new SeasonMetrics(teamName, teamId, season, rpi, sos, srs));
+            SeasonMetrics metric = new SeasonMetrics();
+            metric.setTeamId(teamId);
+            metric.setTeamName(teamName);
+            metric.setSeason(season);
+            metric.setRpi(rpi);
+            metric.setSos(sos);
+            metric.setSrs(srs);
+            resultList.add(metric);
         }
         return resultList;
 

@@ -41,12 +41,12 @@ public class SeasonMetricsDao {
         try (Connection connection = DaoHelper.connect("jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password);
              PreparedStatement statement = connection.prepareStatement(LOAD_METRICS_SQL)) {;
             for (SeasonMetrics metrics : seasonMetrics) {
-                statement.setInt(1, metrics.teamId());
-                statement.setString(2, metrics.teamName());
-                statement.setInt(3, metrics.season());
-                statement.setDouble(4, metrics.rpi());
-                statement.setDouble(5, metrics.sos());
-                statement.setDouble(6, metrics.srs());
+                statement.setInt(1, metrics.getTeamId());
+                statement.setString(2, metrics.getTeamName());
+                statement.setInt(3, metrics.getSeason());
+                statement.setDouble(4, metrics.getRpi());
+                statement.setDouble(5, metrics.getSos());
+                statement.setDouble(6, metrics.getSrs());
                 statement.addBatch();
             }
             statement.executeBatch();

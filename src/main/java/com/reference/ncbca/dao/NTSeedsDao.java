@@ -29,6 +29,8 @@ public class NTSeedsDao {
     private static final String INSERT_SQL = "INSERT INTO nt_seeds (team_id, team_name, season, seed) VALUES (?, ?, ?, ?)";
     private static final String GET_SEED_BY_TEAM_AND_SEASON_SQL = "SELECT * FROM nt_seeds WHERE team_id = ? AND season = ?";
     private static final String GET_ALL_SEEDS_FOR_TEAM_SQL = "SELECT * FROM nt_seeds WHERE team_name = ?";
+    private static final String GET_ALL_SEEDS_FOR_SEASON_SQL = "SELECT * FROM nt_seeds WHERE season = ?";
+
 
 
     private final NTSeedsMapper mapper;
@@ -76,6 +78,19 @@ public class NTSeedsDao {
         try (Connection connection = DaoHelper.connect(CONNECTION_STRING);
              PreparedStatement statement = connection.prepareStatement(GET_ALL_SEEDS_FOR_TEAM_SQL)) {
             statement.setString(1, teamName);
+            ResultSet results = statement.executeQuery();
+            return mapper.mapNTSeeds(results);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    public List<NTSeed> getAllNTSeedsForSeason(Integer season) {
+        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
+        try (Connection connection = DaoHelper.connect(CONNECTION_STRING);
+             PreparedStatement statement = connection.prepareStatement(GET_ALL_SEEDS_FOR_SEASON_SQL)) {
+            statement.setInt(1, season);
             ResultSet results = statement.executeQuery();
             return mapper.mapNTSeeds(results);
         } catch (SQLException ex) {
