@@ -11,9 +11,11 @@ public final class Game {
     private final Integer winningTeamId;
     private final String winningTeamName;
     private final Integer winningTeamScore;
+    private final String winningTeamRecord;
     private final Integer losingTeamId;
     private final String losingTeamName;
     private final Integer losingTeamScore;
+    private final String losingTeamRecord;
     private final String winningCoachName;
     private final String losingCoachName;
     private final String gameType;
@@ -35,6 +37,8 @@ public final class Game {
         this.winningCoachName = builder.winningCoachName;
         this.losingCoachName = builder.losingCoachName;
         this.gameType = builder.gameType;
+        this.winningTeamRecord = builder.winningTeamRecord;
+        this.losingTeamRecord = builder.losingTeamRecord;
     }
 
     // Getters
@@ -102,6 +106,14 @@ public final class Game {
         return gameType;
     }
 
+    public String getLosingTeamRecord() {
+        return losingTeamRecord;
+    }
+
+    public String getWinningTeamRecord() {
+        return this.winningTeamRecord;
+    }
+
     // Builder class
     public static class Builder {
         private Integer gameId;
@@ -120,6 +132,32 @@ public final class Game {
         private String winningCoachName;
         private String losingCoachName;
         private String gameType;
+        private String winningTeamRecord;
+        private String losingTeamRecord;
+
+        public Builder() {
+
+        }
+        public Builder(Game game) {
+            this.gameId = game.getGameId();
+            this.season = game.getSeason();
+            this.neutralSite = game.getNeutralSite();
+            this.homeTeamId = game.getHomeTeamId();
+            this.awayTeamId = game.getAwayTeamId();
+            this.homeTeamName = game.getHomeTeamName();
+            this.awayTeamName = game.getAwayTeamName();
+            this.winningTeamId = game.getWinningTeamId();
+            this.winningTeamName = game.getWinningTeamName();
+            this.winningTeamScore = game.getWinningTeamScore();
+            this.losingTeamId = game.getLosingTeamId();
+            this.losingTeamName = game.getLosingTeamName();
+            this.losingTeamScore = game.getLosingTeamScore();
+            this.winningCoachName = game.getWinningCoachName();
+            this.losingCoachName = game.getLosingCoachName();
+            this.gameType = game.getGameType();
+            this.losingTeamRecord = game.getLosingTeamRecord();
+            this.winningTeamRecord = game.getWinningTeamRecord();
+        }
 
         public Builder gameId(Integer gameId) {
             this.gameId = gameId;
@@ -198,6 +236,16 @@ public final class Game {
 
         public Builder gameType(String gameType) {
             this.gameType = gameType;
+            return this;
+        }
+
+        public Builder losingTeamRecord(String losingTeamRecord) {
+            this.losingTeamRecord = losingTeamRecord;
+            return this;
+        }
+
+        public Builder winningTeamRecord(String winningTeamRecord) {
+            this.winningTeamRecord = winningTeamRecord;
             return this;
         }
 

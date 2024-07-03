@@ -4,12 +4,10 @@ import com.reference.ncbca.dao.GamesDao;
 import com.reference.ncbca.dao.TeamsDao;
 import com.reference.ncbca.model.*;
 import com.reference.ncbca.model.dao.*;
+import com.reference.ncbca.util.GameUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TeamsHandler {
@@ -19,13 +17,15 @@ public class TeamsHandler {
     private final SeasonsHandler seasonsHandler;
     private final NBLHandler nblHandler;
     private final NTSeedsHandler ntSeedsHandler;
+    private final SeasonMetricsHandler seasonMetricsHandler;
 
-    public TeamsHandler(TeamsDao teamsDao, GamesDao gamesDao, SeasonsHandler seasonsHandler, NBLHandler nblHandler, NTSeedsHandler ntSeedsHandler) {
+    public TeamsHandler(TeamsDao teamsDao, GamesDao gamesDao, SeasonsHandler seasonsHandler, NBLHandler nblHandler, NTSeedsHandler ntSeedsHandler, SeasonMetricsHandler seasonMetricsHandler) {
         this.teamsDao = teamsDao;
         this.gamesDao = gamesDao;
         this.seasonsHandler = seasonsHandler;
         this.nblHandler = nblHandler;
         this.ntSeedsHandler = ntSeedsHandler;
+        this.seasonMetricsHandler = seasonMetricsHandler;
     }
 
     public void loadTeams(List<Team> teams) {
@@ -56,16 +56,56 @@ public class TeamsHandler {
 
     public TeamSeasonSummary buildTeamSummary(String teamName, Integer year) {
         List<Game> games = gamesDao.getGamesForTeamByYear(teamName, year);
-        buildOpponentsRecordForGames(games);
-        Season teamSeason = seasonsHandler.getSeasonForTeamAndYear(teamName, year);
+        List<Season> allSeasonsForYear = seasonsHandler.listSeasonsForYear(year);
+        List<Game> augmentedGamesWithOppRecords = buildOpponentsRecordForGames(games, allSeasonsForYear);
+        Season teamSeason = allSeasonsForYear.stream().filter(season -> season.getTeamName().equals(teamName)).findAny().orElse(null);
+        assert teamSeason != null;
         Integer teamId = teamSeason.getTeamId();
         Optional<NTSeed> seed = ntSeedsHandler.getSeedForTeamAndSeason(teamId, year);
         Integer seedLine = seed.map(NTSeed::seed).orElse(null);
-        return new TeamSeasonSummary(teamSeason.getTeamId(), teamSeason.getTeamName(), teamSeason.getGamesWon(), teamSeason.getGamesLost(), teamSeason.getSeasonYear(), teamSeason.getCoach(), games, seedLine);
+        List<SeasonMetrics> allSeasonMetrics = seasonMetricsHandler.getSeasonMetricsForSeason(year);
+        SeasonMetrics teamMetrics = allSeasonMetrics.stream().filter(seasonMetrics -> seasonMetrics.getTeamId().equals(teamId)).findAny().orElse(null);
+        assert teamMetrics != null;
+        buildQuadrantsForTeam(augmentedGamesWithOppRecords, teamMetrics, allSeasonMetrics);
+        determineAndAugmentRPIRank(allSeasonMetrics, teamMetrics);
+        determineAndAugmentSOSRank(allSeasonMetrics, teamMetrics);
+        determineAndAugmentSRSRank(allSeasonMetrics, teamMetrics);
+        teamSeason.setSeasonMetrics(teamMetrics);
+        return new TeamSeasonSummary(teamSeason.getTeamId(), teamSeason.getTeamName(), teamSeason.getGamesWon(), teamSeason.getGamesLost(), teamSeason.getSeasonYear(), teamSeason.getCoach(), augmentedGamesWithOppRecords, seedLine, teamMetrics);
     }
 
-    private void buildOpponentsRecordForGames(List<Game> games) {
+    private void determineAndAugmentRPIRank(List<SeasonMetrics> allSeasonMetrics, SeasonMetrics teamMetrics) {
+        List<SeasonMetrics> sortedMetrics = allSeasonMetrics.stream().sorted(Comparator.comparing(SeasonMetrics::getRpi).reversed()).toList();
+        int rpiRank = sortedMetrics.indexOf(teamMetrics) + 1;
+        teamMetrics.setRpi((double) rpiRank);
+    }
+    private void determineAndAugmentSOSRank(List<SeasonMetrics> allSeasonMetrics, SeasonMetrics teamMetrics) {
+        List<SeasonMetrics> sortedMetrics = allSeasonMetrics.stream().sorted(Comparator.comparing(SeasonMetrics::getSos).reversed()).toList();
+        int sosRank = sortedMetrics.indexOf(teamMetrics) + 1;
+        teamMetrics.setSos((double) sosRank);
+    }
 
+    private void determineAndAugmentSRSRank(List<SeasonMetrics> allSeasonMetrics, SeasonMetrics teamMetrics) {
+        List<SeasonMetrics> sortedMetrics = allSeasonMetrics.stream().sorted(Comparator.comparing(SeasonMetrics::getSrs).reversed()).toList();
+        int srsRank = sortedMetrics.indexOf(teamMetrics) + 1;
+        teamMetrics.setSrs((double) srsRank);
+    }
+
+    private List<Game> buildOpponentsRecordForGames(List<Game> games, List<Season> allSeasonsForYear) {
+        List<Game> augmentedGames = new ArrayList<>();
+        for (Game game: games) {
+            Integer winningTeamId = game.getWinningTeamId();
+            Integer winningTeamGamesWon = Objects.requireNonNull(allSeasonsForYear.stream().filter(season -> season.getTeamId().equals(winningTeamId)).findAny().orElse(null)).getGamesWon();
+            Integer winningTeamGamesLost = Objects.requireNonNull(allSeasonsForYear.stream().filter(season -> season.getTeamId().equals(winningTeamId)).findAny().orElse(null)).getGamesLost();
+            String winningTeamRecord = winningTeamGamesWon + "-" + winningTeamGamesLost;
+            Integer losingTeamId = game.getLosingTeamId();
+            Integer losingTeamGamesWon = Objects.requireNonNull(allSeasonsForYear.stream().filter(season -> season.getTeamId().equals(losingTeamId)).findAny().orElse(null)).getGamesWon();
+            Integer losingTeamGamesLost = Objects.requireNonNull(allSeasonsForYear.stream().filter(season -> season.getTeamId().equals(losingTeamId)).findAny().orElse(null)).getGamesLost();
+            String losingTeamRecord = losingTeamGamesWon + "-" + losingTeamGamesLost;
+            Game augmentedGame = new Game.Builder(game).winningTeamRecord(winningTeamRecord).losingTeamRecord(losingTeamRecord).build();
+            augmentedGames.add(augmentedGame);
+        }
+        return augmentedGames;
     }
 
     public TeamSummary getTeamSummary(String teamName) {
@@ -75,5 +115,16 @@ public class TeamsHandler {
         List<Game> games = gamesDao.getAllGamesForTeam(teamName);
         List<NTSeed> ntSeeds = ntSeedsHandler.getAllSeedsForTeam(teamName).stream().sorted(Comparator.comparing(NTSeed::season)).toList();
         return new TeamSummary(team, seasons, draftPicks, games, ntSeeds);
+    }
+
+    private void buildQuadrantsForTeam(List<Game> games, SeasonMetrics metric, List<SeasonMetrics> allSeasonMetrics) {
+        String q1Record = GameUtils.buildQ1Record(games, metric, allSeasonMetrics);
+        String q2Record = GameUtils.buildQ2Record(games, metric, allSeasonMetrics);
+        String q3Record = GameUtils.buildQ3Record(games, metric, allSeasonMetrics);
+        String q4Record = GameUtils.buildQ4Record(games, metric, allSeasonMetrics);
+        metric.setQ1Record(q1Record);
+        metric.setQ2Record(q2Record);
+        metric.setQ3Record(q3Record);
+        metric.setQ4Record(q4Record);
     }
 }
