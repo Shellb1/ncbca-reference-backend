@@ -56,11 +56,16 @@ public class TeamsHandler {
 
     public TeamSeasonSummary buildTeamSummary(String teamName, Integer year) {
         List<Game> games = gamesDao.getGamesForTeamByYear(teamName, year);
+        buildOpponentsRecordForGames(games);
         Season teamSeason = seasonsHandler.getSeasonForTeamAndYear(teamName, year);
         Integer teamId = teamSeason.getTeamId();
         Optional<NTSeed> seed = ntSeedsHandler.getSeedForTeamAndSeason(teamId, year);
         Integer seedLine = seed.map(NTSeed::seed).orElse(null);
         return new TeamSeasonSummary(teamSeason.getTeamId(), teamSeason.getTeamName(), teamSeason.getGamesWon(), teamSeason.getGamesLost(), teamSeason.getSeasonYear(), teamSeason.getCoach(), games, seedLine);
+    }
+
+    private void buildOpponentsRecordForGames(List<Game> games) {
+
     }
 
     public TeamSummary getTeamSummary(String teamName) {

@@ -31,7 +31,25 @@ public class GamesMapper {
             String winningCoachName = resultSet.getString("winning_coach_name");
             String losingCoachName = resultSet.getString("losing_coach_name");
             String gameType = resultSet.getString("game_type");
-            games.add(new Game(gameId, season, neutralSite, homeTeamId, awayTeamId, homeTeamName, awayTeamName, winningTeamId, winningTeamName, winningTeamScore, losingTeamId, losingTeamName, losingTeamScore, winningCoachName, losingCoachName, gameType));
+            games.add(new Game.Builder()
+                    .gameId(gameId)
+                    .season(season)
+                    .neutralSite(neutralSite)
+                    .homeTeamId(homeTeamId)
+                    .awayTeamId(awayTeamId)
+                    .homeTeamName(homeTeamName)
+                    .awayTeamName(awayTeamName)
+                    .winningTeamId(winningTeamId)
+                    .winningTeamName(winningTeamName)
+                    .winningTeamScore(winningTeamScore)
+                    .losingTeamId(losingTeamId)
+                    .losingTeamName(losingTeamName)
+                    .losingTeamScore(losingTeamScore)
+                    .winningCoachName(winningCoachName)
+                    .losingCoachName(losingCoachName)
+                    .gameType(gameType)
+                    .build());
+
         }
 
         return games;

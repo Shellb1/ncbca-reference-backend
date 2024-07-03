@@ -44,7 +44,7 @@ public class SeasonsHandler {
             }
             for (SeasonMetrics metric: metrics) {
                 if (season.getTeamId().equals(metric.getTeamId())) {
-                    List<Game> teamsGames = allGamesInSeason.stream().filter(game -> game.winningTeamId().equals(metric.getTeamId()) || game.losingTeamId().equals(metric.getTeamId())).toList();
+                    List<Game> teamsGames = allGamesInSeason.stream().filter(game -> game.getWinningTeamId().equals(metric.getTeamId()) || game.getLosingTeamId().equals(metric.getTeamId())).toList();
                     buildQuadrantsForTeam(teamsGames, metric, metrics);
                    season.setSeasonMetrics(metric);
                    break;

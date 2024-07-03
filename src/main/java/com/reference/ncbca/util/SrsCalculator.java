@@ -22,10 +22,10 @@ public class SrsCalculator {
         }
 
         for (Game game : games) {
-            int winningTeamId = game.winningTeamId();
-            int losingTeamId = game.losingTeamId();
-            double winningTeamScore = game.winningTeamScore();
-            double losingTeamScore = game.losingTeamScore();
+            int winningTeamId = game.getWinningTeamId();
+            int losingTeamId = game.getLosingTeamId();
+            double winningTeamScore = game.getWinningTeamScore();
+            double losingTeamScore = game.getLosingTeamScore();
 
             totalPointsFor.put(winningTeamId, totalPointsFor.get(winningTeamId) + winningTeamScore);
             totalPointsAgainst.put(winningTeamId, totalPointsAgainst.get(winningTeamId) + losingTeamScore);
@@ -38,7 +38,7 @@ public class SrsCalculator {
         for (Integer teamId : totalPointsFor.keySet()) {
             double pointsFor = totalPointsFor.get(teamId);
             double pointsAgainst = totalPointsAgainst.get(teamId);
-            long gamesPlayedByTeam = games.stream().filter(game -> game.homeTeamId().equals(teamId) || game.awayTeamId().equals(teamId)).count();
+            long gamesPlayedByTeam = games.stream().filter(game -> game.getHomeTeamId().equals(teamId) || game.getAwayTeamId().equals(teamId)).count();
             double initialSRS = (gamesPlayedByTeam > 0) ? (pointsFor - pointsAgainst) / gamesPlayedByTeam : 0.0;
             srs.put(teamId, initialSRS);
         }
@@ -56,17 +56,17 @@ public class SrsCalculator {
                 double opponentGames = 0.0;
 
                 for (Game game : games) {
-                    if (game.homeTeamId().equals(teamId)) {
-                        totalOpponentSRS += srs.getOrDefault(game.awayTeamId(), 0.0);
+                    if (game.getHomeTeamId().equals(teamId)) {
+                        totalOpponentSRS += srs.getOrDefault(game.getAwayTeamId(), 0.0);
                         opponentGames++;
-                    } else if (game.awayTeamId().equals(teamId)) {
-                        totalOpponentSRS += srs.getOrDefault(game.homeTeamId(), 0.0);
+                    } else if (game.getAwayTeamId().equals(teamId)) {
+                        totalOpponentSRS += srs.getOrDefault(game.getHomeTeamId(), 0.0);
                         opponentGames++;
                     }
                 }
 
                 double sos = (opponentGames > 0) ? totalOpponentSRS / opponentGames : 0.0;
-                long gamesPlayedByTeam = games.stream().filter(game -> game.homeTeamId().equals(teamId) || game.awayTeamId().equals(teamId)).count();
+                long gamesPlayedByTeam = games.stream().filter(game -> game.getHomeTeamId().equals(teamId) || game.getAwayTeamId().equals(teamId)).count();
                 double avgPointDifferential = (gamesPlayedByTeam > 0) ? (totalPointsFor.get(teamId) - totalPointsAgainst.get(teamId)) / gamesPlayedByTeam : 0.0;
                 double newSrsValue = avgPointDifferential + sos;
 

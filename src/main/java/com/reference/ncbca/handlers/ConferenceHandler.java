@@ -78,7 +78,7 @@ public class ConferenceHandler {
         Integer gamesWon = 0;
         Integer gamesLost = 0;
         for (Game game: conferenceGamesTeamWasInvolvedIn) {
-            if (game.winningTeamName().equals(teamName)) {
+            if (game.getWinningTeamName().equals(teamName)) {
                 gamesWon++;
             } else {
                 gamesLost++;
@@ -88,15 +88,15 @@ public class ConferenceHandler {
     }
 
     private List<Game> determineConferenceGamesTeamWasInvolvedIn(String teamName, List<Game> allGamesInyear) {
-        allGamesInyear.sort(Comparator.comparing(Game::gameId));
-        List<Game> allGamesForTeam = allGamesInyear.stream().filter(game -> game.gameType().equals("REGULAR_SEASON") && (game.winningTeamName().equals(teamName) || game.losingTeamName().equals(teamName))).toList();
+        allGamesInyear.sort(Comparator.comparing(Game::getGameId));
+        List<Game> allGamesForTeam = allGamesInyear.stream().filter(game -> game.getGameType().equals("REGULAR_SEASON") && (game.getWinningTeamName().equals(teamName) || game.getLosingTeamName().equals(teamName))).toList();
         if (allGamesForTeam.size() <= 12) {
             return Collections.emptyList();
-        } else if (allGamesForTeam.size() <= 33) {
+        } else if (allGamesForTeam.size() <= 34) {
             int lastIndex = allGamesForTeam.size();
             return allGamesForTeam.subList(12, lastIndex);
         } else {
-            return allGamesInyear.stream().filter(game -> game.gameType().equals("REGULAR_SEASON") && (game.winningTeamName().equals(teamName) || game.losingTeamName().equals(teamName))).toList().subList(11, 33);
+            return allGamesInyear.stream().filter(game -> game.getGameType().equals("REGULAR_SEASON") && (game.getWinningTeamName().equals(teamName) || game.getLosingTeamName().equals(teamName))).toList().subList(11, 33);
         }
     }
 

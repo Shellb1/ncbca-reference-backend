@@ -15,11 +15,11 @@ public class SosCalculator {
 
     private static double calculateOpponentsWinningPercentage(Integer teamId, List<Game> allGamesForSeason) {
         List<Integer> opponentsTids = allGamesForSeason.stream().map(game -> {
-            if (game.winningTeamId().equals(teamId) || Objects.equals(game.losingTeamId(), teamId)) {
-                if (game.winningTeamId().equals(teamId)) {
-                    return game.losingTeamId();
+            if (game.getWinningTeamId().equals(teamId) || Objects.equals(game.getLosingTeamId(), teamId)) {
+                if (game.getWinningTeamId().equals(teamId)) {
+                    return game.getLosingTeamId();
                 } else {
-                    return game.winningTeamId();
+                    return game.getWinningTeamId();
                 }
             }
             return null;

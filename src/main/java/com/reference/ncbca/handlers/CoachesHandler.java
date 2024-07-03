@@ -51,11 +51,11 @@ public class CoachesHandler {
 
         for (Game game : gamesCoachedIn) {
             String opponentCoachName;
-            if (coachName.equals(game.winningCoachName())) {
-                opponentCoachName = game.losingCoachName();
+            if (coachName.equals(game.getWinningCoachName())) {
+                opponentCoachName = game.getLosingCoachName();
                 winsMap.put(opponentCoachName, winsMap.getOrDefault(opponentCoachName, 0) + 1);
             } else {
-                opponentCoachName = game.winningCoachName();
+                opponentCoachName = game.getWinningCoachName();
                 lossesMap.put(opponentCoachName, lossesMap.getOrDefault(opponentCoachName, 0) + 1);
             }
         }

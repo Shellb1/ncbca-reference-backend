@@ -63,26 +63,27 @@ public class GamesDao {
             List<Game> existingGames = getAllExistingGamesForSeason(season);
             for (Game game : games) {
                 // Check if the game already exists in the database
-                if (!isGameExists(game.gameId(), game.season(), existingGames)) {
-                    pstmt.setInt(1, game.gameId());
-                    pstmt.setInt(2, game.season());
-                    pstmt.setBoolean(3, game.neutralSite());
-                    pstmt.setInt(4, game.homeTeamId());
-                    pstmt.setInt(5, game.awayTeamId());
-                    pstmt.setString(6, game.homeTeamName());
-                    pstmt.setString(7, game.awayTeamName());
-                    pstmt.setInt(8, game.winningTeamId());
-                    pstmt.setString(9, game.winningTeamName());
-                    pstmt.setInt(10, game.winningTeamScore());
-                    pstmt.setInt(11, game.losingTeamId());
-                    pstmt.setString(12, game.losingTeamName());
-                    pstmt.setInt(13, game.losingTeamScore());
-                    pstmt.setString(14, game.winningCoachName());
-                    pstmt.setString(15, game.losingCoachName());
-                    pstmt.setString(16, game.gameType());
+                if (!isGameExists(game.getGameId(), game.getSeason(), existingGames)) {
+                    pstmt.setInt(1, game.getGameId());
+                    pstmt.setInt(2, game.getSeason());
+                    pstmt.setBoolean(3, game.getNeutralSite());
+                    pstmt.setInt(4, game.getHomeTeamId());
+                    pstmt.setInt(5, game.getAwayTeamId());
+                    pstmt.setString(6, game.getHomeTeamName());
+                    pstmt.setString(7, game.getAwayTeamName());
+                    pstmt.setInt(8, game.getWinningTeamId());
+                    pstmt.setString(9, game.getWinningTeamName());
+                    pstmt.setInt(10, game.getWinningTeamScore());
+                    pstmt.setInt(11, game.getLosingTeamId());
+                    pstmt.setString(12, game.getLosingTeamName());
+                    pstmt.setInt(13, game.getLosingTeamScore());
+                    pstmt.setString(14, game.getWinningCoachName());
+                    pstmt.setString(15, game.getLosingCoachName());
+                    pstmt.setString(16, game.getGameType());
                     pstmt.addBatch();
+
                 } else {
-                    System.out.println("Game with ID " + game.gameId() + " already exists in the database. Skipping insertion.");
+                    System.out.println("Game with ID " + game.getGameId() + " already exists in the database. Skipping insertion.");
                 }
             }
             pstmt.executeBatch();
@@ -94,7 +95,7 @@ public class GamesDao {
 
     private boolean isGameExists(Integer gameId, Integer season, List<Game> existingGames) {
         for (Game game : existingGames) {
-            if (game.gameId().equals(gameId) && game.season().equals(season)) {
+            if (game.getGameId().equals(gameId) && game.getSeason().equals(season)) {
                 return true;
             }
         }
@@ -197,22 +198,22 @@ public class GamesDao {
         String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
         try (Connection connection = DaoHelper.connect(CONNECTION_STRING); PreparedStatement statement = connection.prepareStatement(EDIT_GAMES_SQL)) {
             for (Game game: games) {
-                statement.setBoolean(1, game.neutralSite());
-                statement.setInt(2, game.homeTeamId());
-                statement.setInt(3, game.awayTeamId());
-                statement.setString(4, game.homeTeamName());
-                statement.setString(5, game.awayTeamName());
-                statement.setInt(6, game.winningTeamId());
-                statement.setString(7, game.winningTeamName());
-                statement.setInt(8, game.winningTeamScore());
-                statement.setInt(9, game.losingTeamId());
-                statement.setString(10, game.losingTeamName());
-                statement.setInt(11, game.losingTeamScore());
-                statement.setString(12, game.winningCoachName());
-                statement.setString(13, game.losingCoachName());
-                statement.setString(14, game.gameType());
-                statement.setInt(15, game.gameId());
-                statement.setInt(16, game.season());
+                statement.setBoolean(1, game.getNeutralSite());
+                statement.setInt(2, game.getHomeTeamId());
+                statement.setInt(3, game.getAwayTeamId());
+                statement.setString(4, game.getHomeTeamName());
+                statement.setString(5, game.getAwayTeamName());
+                statement.setInt(6, game.getWinningTeamId());
+                statement.setString(7, game.getWinningTeamName());
+                statement.setInt(8, game.getWinningTeamScore());
+                statement.setInt(9, game.getLosingTeamId());
+                statement.setString(10, game.getLosingTeamName());
+                statement.setInt(11, game.getLosingTeamScore());
+                statement.setString(12, game.getWinningCoachName());
+                statement.setString(13, game.getLosingCoachName());
+                statement.setString(14, game.getGameType());
+                statement.setInt(15, game.getGameId());
+                statement.setInt(16, game.getSeason());
                 statement.addBatch();
             }
             int[] updates = statement.executeBatch();

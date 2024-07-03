@@ -20,18 +20,35 @@ public class BackloadingHandler {
         List<Game> gamesToBackload = new ArrayList<>();
         for (Game game: gamesList) {
             String gameType = null;
-            if (game.gameId() <= 2175) {
+            if (game.getGameId() <= 2175) {
                 gameType = "REGULAR_SEASON";
-            } else if (game.gameId() <= 2295) {
+            } else if (game.getGameId() <= 2295) {
                 gameType = "CONFERENCE_TOURNAMENT";
-            } else if (game.gameId() <= 2310) {
+            } else if (game.getGameId() <= 2310) {
                 gameType = "NIT";
-            } else if (game.gameId() <= 2318) {
+            } else if (game.getGameId() <= 2318) {
                 gameType = "FIRST_SIXTEEN";
             } else {
                 gameType = "NT";
             }
-            gamesToBackload.add(new Game(game.gameId(), game.season(), game.neutralSite(), game.homeTeamId(), game.awayTeamId(), game.homeTeamName(), game.awayTeamName(), game.winningTeamId(), game.winningTeamName(), game.winningTeamScore(), game.losingTeamId(), game.losingTeamName(), game.losingTeamScore(), game.winningCoachName(), game.losingCoachName(), gameType));
+            gamesToBackload.add(new Game.Builder()
+                    .gameId(game.getGameId())
+                    .season(game.getSeason())
+                    .neutralSite(game.getNeutralSite())
+                    .homeTeamId(game.getHomeTeamId())
+                    .awayTeamId(game.getAwayTeamId())
+                    .homeTeamName(game.getHomeTeamName())
+                    .awayTeamName(game.getAwayTeamName())
+                    .winningTeamId(game.getWinningTeamId())
+                    .winningTeamName(game.getWinningTeamName())
+                    .winningTeamScore(game.getWinningTeamScore())
+                    .losingTeamId(game.getLosingTeamId())
+                    .losingTeamName(game.getLosingTeamName())
+                    .losingTeamScore(game.getLosingTeamScore())
+                    .winningCoachName(game.getWinningCoachName())
+                    .losingCoachName(game.getLosingCoachName())
+                    .gameType(game.getGameType())
+                    .build());
         }
         gamesHandler.backload(gamesToBackload);
     }
