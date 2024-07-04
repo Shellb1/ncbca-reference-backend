@@ -73,7 +73,7 @@ public class GameUtils {
                 }
             }
             // Q1 neutral win
-            if (game.getAwayTeamId().equals(metric.getTeamId()) && !game.getGameType().equals("REGULAR_SEASON")) {
+            if ((game.getAwayTeamId().equals(metric.getTeamId()) || game.getHomeTeamId().equals(metric.getTeamId())) && !game.getGameType().equals("REGULAR_SEASON")) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
                     if (otherTeamSrsRank <= 20) {
                         q1GamesWon++;
@@ -126,13 +126,13 @@ public class GameUtils {
                 }
             }
             // Q2 neutral win
-            if (game.getAwayTeamId().equals(metric.getTeamId()) && !game.getGameType().equals("REGULAR_SEASON")) {
+            if ((game.getAwayTeamId().equals(metric.getTeamId()) || game.getHomeTeamId().equals(metric.getTeamId())) && !game.getGameType().equals("REGULAR_SEASON")) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
-                    if (otherTeamSrsRank <= 20) {
+                    if (otherTeamSrsRank >= 21 && otherTeamSrsRank <= 46) {
                         q2GamesWon++;
                     }
                 } else if (game.getLosingTeamId().equals(metric.getTeamId())) {
-                    if (otherTeamSrsRank <= 20) {
+                    if (otherTeamSrsRank >= 21 && otherTeamSrsRank <= 46) {
                         q2GamesLost++;
                     }
                 }
@@ -180,7 +180,7 @@ public class GameUtils {
             }
 
             // Q3 neutral win
-            if (game.getAwayTeamId().equals(metric.getTeamId()) && !game.getGameType().equals("REGULAR_SEASON")) {
+            if ((game.getAwayTeamId().equals(metric.getTeamId()) || game.getHomeTeamId().equals(metric.getTeamId())) && !game.getGameType().equals("REGULAR_SEASON")) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
                     if (otherTeamSrsRank >= 47 && otherTeamSrsRank <= 82) {
                         q3GamesWon++;
@@ -233,7 +233,7 @@ public class GameUtils {
                 }
             }
             // Q4 neutral win
-            if (game.getAwayTeamId().equals(metric.getTeamId()) && !game.getGameType().equals("REGULAR_SEASON")) {
+            if ((game.getAwayTeamId().equals(metric.getTeamId()) || game.getHomeTeamId().equals(metric.getTeamId())) && !game.getGameType().equals("REGULAR_SEASON")) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
                     if (otherTeamSrsRank >= 83 ) {
                         q4GamesWon++;
