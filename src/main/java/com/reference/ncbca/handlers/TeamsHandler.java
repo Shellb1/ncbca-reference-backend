@@ -66,7 +66,10 @@ public class TeamsHandler {
         List<SeasonMetrics> allSeasonMetrics = seasonMetricsHandler.getSeasonMetricsForSeason(year);
         SeasonMetrics teamMetrics = allSeasonMetrics.stream().filter(seasonMetrics -> seasonMetrics.getTeamId().equals(teamId)).findAny().orElse(null);
         assert teamMetrics != null;
-        buildQuadrantsForTeam(augmentedGamesWithOppRecords, teamMetrics, allSeasonMetrics);
+        teamMetrics.setQ1Record(teamSeason.getSeasonMetrics().getQ1Record());
+        teamMetrics.setQ2Record(teamSeason.getSeasonMetrics().getQ2Record());
+        teamMetrics.setQ3Record(teamSeason.getSeasonMetrics().getQ3Record());
+        teamMetrics.setQ4Record(teamSeason.getSeasonMetrics().getQ4Record());
         determineAndAugmentRPIRank(allSeasonMetrics, teamMetrics);
         determineAndAugmentSOSRank(allSeasonMetrics, teamMetrics);
         determineAndAugmentSRSRank(allSeasonMetrics, teamMetrics);
@@ -122,6 +125,21 @@ public class TeamsHandler {
         String q2Record = GameUtils.buildQ2Record(games, metric, allSeasonMetrics);
         String q3Record = GameUtils.buildQ3Record(games, metric, allSeasonMetrics);
         String q4Record = GameUtils.buildQ4Record(games, metric, allSeasonMetrics);
+        Integer q1Wins = Integer.valueOf(q1Record.split("-")[0]);
+        Integer q2Wins = Integer.valueOf(q2Record.split("-")[0]);
+        Integer q3Wins = Integer.valueOf(q3Record.split("-")[0]);
+        Integer q4Wins = Integer.valueOf(q4Record.split("-")[0]);
+        Integer q1Losses = Integer.valueOf(q1Record.split("-")[1]);
+        Integer q2Losses = Integer.valueOf(q2Record.split("-")[1]);
+        Integer q3Losses = Integer.valueOf(q3Record.split("-")[1]);
+        Integer q4Losses = Integer.valueOf(q4Record.split("-")[1]);
+        Season teamSeason = seasonsHandler.getSeasonForTeamAndYear(metric.getTeamName(), metric.getSeason());
+        if (q1Wins + q2Wins + q3Wins + q4Wins != teamSeason.getGamesWon()) {
+            System.out.println("ERROR WITH WINS");
+        }
+        if (q1Losses + q2Losses + q3Losses + q4Losses != teamSeason.getGamesLost()) {
+            System.out.println("ERROR WITH LOSSES WITH TEAM: " + teamSeason.getTeamName());
+        }
         metric.setQ1Record(q1Record);
         metric.setQ2Record(q2Record);
         metric.setQ3Record(q3Record);

@@ -38,9 +38,10 @@ public class GameUtils {
     public static String buildQ1Record(List<Game> games, SeasonMetrics metric, List<SeasonMetrics> allSeasonMetrics) {
         int q1GamesWon = 0;
         int q1GamesLost = 0;
+        Integer teamId = metric.getTeamId();
         for (Game game: games) {
             Integer otherTeamId;
-            if (game.getWinningTeamId().equals(metric.getTeamId())) {
+            if (game.getWinningTeamId().equals(teamId)) {
                 otherTeamId = game.getLosingTeamId();
             } else {
                 otherTeamId = game.getWinningTeamId();
@@ -48,7 +49,7 @@ public class GameUtils {
             int otherTeamSrsRank = getSrsRank(allSeasonMetrics, otherTeamId);
 
             // Q1 home win
-            if (game.getHomeTeamId().equals(metric.getTeamId()) && game.getGameType().equals("REGULAR_SEASON")) {
+            if (game.getHomeTeamId().equals(metric.getTeamId()) && !game.getNeutralSite()) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
                     if (otherTeamSrsRank <= 15) {
                         q1GamesWon++;
@@ -73,7 +74,7 @@ public class GameUtils {
                 }
             }
             // Q1 neutral win
-            if ((game.getAwayTeamId().equals(metric.getTeamId()) || game.getHomeTeamId().equals(metric.getTeamId())) && !game.getGameType().equals("REGULAR_SEASON")) {
+            if (!game.getGameType().equals("REGULAR_SEASON")) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
                     if (otherTeamSrsRank <= 20) {
                         q1GamesWon++;
@@ -91,9 +92,10 @@ public class GameUtils {
     public static String buildQ2Record(List<Game> games, SeasonMetrics metric, List<SeasonMetrics> allSeasonMetrics) {
         int q2GamesWon = 0;
         int q2GamesLost = 0;
+        int teamId = metric.getTeamId();
         for (Game game: games) {
             Integer otherTeamId;
-            if (game.getWinningTeamId().equals(metric.getTeamId())) {
+            if (game.getWinningTeamId().equals(teamId)) {
                 otherTeamId = game.getLosingTeamId();
             } else {
                 otherTeamId = game.getWinningTeamId();
@@ -101,12 +103,12 @@ public class GameUtils {
             int otherTeamSrsRank = getSrsRank(allSeasonMetrics, otherTeamId);
 
             // Q2 home win
-            if (game.getHomeTeamId().equals(metric.getTeamId()) && game.getGameType().equals("REGULAR_SEASON")) {
+            if (game.getHomeTeamId().equals(teamId) && !game.getNeutralSite()) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
                     if (otherTeamSrsRank >= 16 && otherTeamSrsRank <= 40) {
                         q2GamesWon++;
                     }
-                } else if (game.getLosingTeamId().equals(metric.getTeamId())) {
+                } else if (game.getLosingTeamId().equals(teamId)) {
                     if (otherTeamSrsRank >= 16 && otherTeamSrsRank <= 40) {
                         q2GamesLost++;
                     }
@@ -114,24 +116,24 @@ public class GameUtils {
             }
 
             // Q2 away win
-            if (game.getAwayTeamId().equals(metric.getTeamId()) && game.getGameType().equals("REGULAR_SEASON")) {
-                if (game.getWinningTeamId().equals(metric.getTeamId())) {
+            if (game.getAwayTeamId().equals(teamId) && !game.getNeutralSite()) {
+                if (game.getWinningTeamId().equals(teamId)) {
                     if (otherTeamSrsRank >= 26 && otherTeamSrsRank <= 53) {
                         q2GamesWon++;
                     }
-                } else if (game.getLosingTeamId().equals(metric.getTeamId())) {
+                } else if (game.getLosingTeamId().equals(teamId)) {
                     if (otherTeamSrsRank >= 26 && otherTeamSrsRank <= 53) {
                         q2GamesLost++;
                     }
                 }
             }
             // Q2 neutral win
-            if ((game.getAwayTeamId().equals(metric.getTeamId()) || game.getHomeTeamId().equals(metric.getTeamId())) && !game.getGameType().equals("REGULAR_SEASON")) {
-                if (game.getWinningTeamId().equals(metric.getTeamId())) {
+            if (game.getNeutralSite()) {
+                if (game.getWinningTeamId().equals(teamId)) {
                     if (otherTeamSrsRank >= 21 && otherTeamSrsRank <= 46) {
                         q2GamesWon++;
                     }
-                } else if (game.getLosingTeamId().equals(metric.getTeamId())) {
+                } else if (game.getLosingTeamId().equals(teamId)) {
                     if (otherTeamSrsRank >= 21 && otherTeamSrsRank <= 46) {
                         q2GamesLost++;
                     }
@@ -144,9 +146,10 @@ public class GameUtils {
     public static String buildQ3Record(List<Game> games, SeasonMetrics metric, List<SeasonMetrics> allSeasonMetrics) {
         int q3GamesWon = 0;
         int q3GamesLost = 0;
+        int teamId = metric.getTeamId();
         for (Game game: games) {
             Integer otherTeamId;
-            if (game.getWinningTeamId().equals(metric.getTeamId())) {
+            if (game.getWinningTeamId().equals(teamId)) {
                 otherTeamId = game.getLosingTeamId();
             } else {
                 otherTeamId = game.getWinningTeamId();
@@ -154,13 +157,13 @@ public class GameUtils {
             int otherTeamSrsRank = getSrsRank(allSeasonMetrics, otherTeamId);
 
             // Q3 home win
-            if (game.getHomeTeamId().equals(metric.getTeamId()) && game.getGameType().equals("REGULAR_SEASON")) {
+            if (game.getHomeTeamId().equals(metric.getTeamId()) && !game.getNeutralSite()) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
-                    if (otherTeamSrsRank >= 40 && otherTeamSrsRank <= 74) {
+                    if (otherTeamSrsRank >= 41 && otherTeamSrsRank <= 74) {
                         q3GamesWon++;
                     }
                 } else if (game.getLosingTeamId().equals(metric.getTeamId())) {
-                    if (otherTeamSrsRank >= 40 && otherTeamSrsRank <= 74) {
+                    if (otherTeamSrsRank >= 41 && otherTeamSrsRank <= 74) {
                         q3GamesLost++;
                     }
                 }
@@ -180,7 +183,7 @@ public class GameUtils {
             }
 
             // Q3 neutral win
-            if ((game.getAwayTeamId().equals(metric.getTeamId()) || game.getHomeTeamId().equals(metric.getTeamId())) && !game.getGameType().equals("REGULAR_SEASON")) {
+            if (game.getNeutralSite()) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
                     if (otherTeamSrsRank >= 47 && otherTeamSrsRank <= 82) {
                         q3GamesWon++;
@@ -233,7 +236,7 @@ public class GameUtils {
                 }
             }
             // Q4 neutral win
-            if ((game.getAwayTeamId().equals(metric.getTeamId()) || game.getHomeTeamId().equals(metric.getTeamId())) && !game.getGameType().equals("REGULAR_SEASON")) {
+            if (!game.getGameType().equals("REGULAR_SEASON")) {
                 if (game.getWinningTeamId().equals(metric.getTeamId())) {
                     if (otherTeamSrsRank >= 83 ) {
                         q4GamesWon++;
@@ -249,7 +252,7 @@ public class GameUtils {
     }
 
 
-    private static Integer getSrsRank(List<SeasonMetrics> allSeasonMetrics, Integer teamId) {
+    public static Integer getSrsRank(List<SeasonMetrics> allSeasonMetrics, Integer teamId) {
         allSeasonMetrics.sort(Comparator.comparing(SeasonMetrics::getSrs).reversed());
         SeasonMetrics teamSeasonMetrics = allSeasonMetrics.stream().filter(seasonMetrics -> seasonMetrics.getTeamId().equals(teamId)).findFirst().orElse(null);
         return allSeasonMetrics.indexOf(teamSeasonMetrics);
