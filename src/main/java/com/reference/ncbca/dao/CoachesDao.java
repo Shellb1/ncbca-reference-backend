@@ -24,7 +24,6 @@ public class CoachesDao {
     private static final String INSERT_SQL = "INSERT INTO Coaches (coach_name, start_season, end_season, active, current_team) VALUES (?, ?, ?, ?, ?)";
     private static final String GET_COACH_FROM_TEAM_NAME_SQL = "SELECT * FROM Coaches WHERE active = 1 AND current_team = ?";
     private static final String GET_ALL_COACHES_SQL = "SELECT * FROM Coaches";
-    private static final String MARK_RETIRED_COACHES_SQL = "UPDATE Coaches SET end_season = ?, active = false WHERE coach_name = ?;";
     private static final String UPDATE_SQL = "UPDATE Coaches "
             + "SET active = ?, current_team = ? "
             + "WHERE coach_name = ?";
@@ -84,20 +83,6 @@ public class CoachesDao {
             System.out.println(e.getMessage());
         }
         return null;
-    }
-
-    public void markRetiredCoaches(List<Coach> retiredCoaches, Integer season) {
-        String CONNECTION_STRING = "jdbc:mysql://" + databaseHostName + "/ncbca_reference?user=" + userName + "&password=" + password;
-        try (Connection conn = DaoHelper.connect(CONNECTION_STRING); PreparedStatement pstmt = conn.prepareStatement(MARK_RETIRED_COACHES_SQL);) {
-            for (Coach coach : retiredCoaches) {
-                pstmt.setInt(1, season);
-                pstmt.setString(2, coach.coachName());
-                pstmt.addBatch();
-            }
-            pstmt.executeBatch();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
     }
 
     public void updateCoaches(List<Coach> coaches) {

@@ -26,10 +26,6 @@ public class CoachesHandler {
         coachesDao.updateCoaches(coaches);
     }
 
-    private void markRetiredCoaches(List<Coach> retiredCoaches, Integer season) {
-        coachesDao.markRetiredCoaches(retiredCoaches, season);
-    }
-
     public Coach getCoachOfTeam(String teamName) {
         return coachesDao.getCoachFromTeam(teamName);
     }
